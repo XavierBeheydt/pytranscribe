@@ -26,16 +26,19 @@ LANGUAGES = (
 
 @dataclass
 class Args:
-    audio: Path
+    file: Path
     output_dir: Path
     lang: str
     format: str
     diarize: bool
+    rename: dict[str, str]
 
     @classmethod
     def parse(cls) -> Self:
         parser = argparse.ArgumentParser(description="Transcribe an audio file with WhisperX.")
-        parser.add_argument("audio", type=Path, help="audio file to transcribe")
+        parser.add_argument(
+            "file", type=Path, help="audio file to transcribe, or transcript to edit with --rename"
+        )
         parser.add_argument(
             "-o", "--output-dir", type=Path, help="output directory (default: the audio's)"
         )
@@ -49,8 +52,16 @@ class Args:
             "--no-diarize", dest="diarize", action="store_false",
             help="skip speaker diarization (no Hugging Face token needed)",
         )
+        parser.add_argument(
+            "--rename", nargs="+", default=[], metavar="OLD=NEW",
+            type=lambda pair: pair.split("=", 1),
+            help="rename speakers in an existing transcript, without transcribing",
+        )
         ns = parser.parse_args()
-        return cls(ns.audio, ns.output_dir or ns.audio.parent, ns.lang, ns.format, ns.diarize)
+        return cls(
+            ns.file, ns.output_dir or ns.file.parent, ns.lang, ns.format, ns.diarize,
+            dict(ns.rename),
+        )
 
 
 def progress(step: str) -> Callable[[float], None]:
@@ -70,7 +81,7 @@ def transcribe(args: Args) -> list[dict]:
     from whisperx.diarize import DiarizationPipeline
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    audio = whisperx.load_audio(str(args.audio))
+    audio = whisperx.load_audio(str(args.file))
     compute_type = "float16" if device == "cuda" else "int8"
     model = whisperx.load_model("medium", device, compute_type=compute_type, language=args.lang)
     result = model.transcribe(audio, batch_size=16, progress_callback=progress("transcribe"))
@@ -122,8 +133,11 @@ def rename(path: Path, names: dict[str, str]) -> None:
 
 def main() -> None:
     args = Args.parse()
+    if args.rename:
+        rename(args.file, args.rename)
+        return
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    output = args.output_dir / f"{args.audio.stem}.{args.format}"
+    output = args.output_dir / f"{args.file.stem}.{args.format}"
     segments = transcribe(args)
     output.write_text(render(segments, args.format))
     print(output)
