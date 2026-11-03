@@ -12,6 +12,7 @@ import os
 import sys
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import timedelta
 from pathlib import Path
 from typing import Self
 
@@ -92,12 +93,41 @@ def render(segments: list[dict], fmt: str) -> str:
     ) + "\n"
 
 
+def report(segments: list[dict]) -> list[str]:
+    time: dict[str, float] = {}
+    quote: dict[str, str] = {}
+    for s in segments:
+        if "speaker" not in s: continue
+        time[s["speaker"]] = time.get(s["speaker"], 0) + s["end"] - s["start"]
+        quote.setdefault(s["speaker"], s["text"].strip())
+    speakers = sorted(time)
+    print(f"{len(speakers)} speakers found:")
+    for speaker in speakers:
+        duration = timedelta(seconds=round(time[speaker]))
+        print(f'  {speaker}  {duration}  "{quote[speaker][:60]}"')
+    return speakers
+
+
+def ask_names(speakers: list[str]) -> dict[str, str]:
+    names = {s: input(f"Name for {s} (Enter to keep): ").strip() for s in speakers}
+    return {s: name for s, name in names.items() if name}
+
+
+def rename(path: Path, names: dict[str, str]) -> None:
+    text = path.read_text()
+    for old, new in names.items():
+        text = text.replace(f"**{old}**:", f"**{new}**:").replace(f"[{old}] ", f"[{new}] ")
+    path.write_text(text)
+
+
 def main() -> None:
     args = Args.parse()
     args.output_dir.mkdir(parents=True, exist_ok=True)
     output = args.output_dir / f"{args.audio.stem}.{args.format}"
-    output.write_text(render(transcribe(args), args.format))
+    segments = transcribe(args)
+    output.write_text(render(segments, args.format))
     print(output)
+    if args.diarize: rename(output, ask_names(report(segments)))
 
 
 if __name__ == "__main__":
