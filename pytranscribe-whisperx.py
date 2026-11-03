@@ -7,6 +7,7 @@
 # ///
 
 import argparse
+import itertools
 import os
 import sys
 from collections.abc import Callable
@@ -52,9 +53,12 @@ class Args:
 
 
 def progress(step: str) -> Callable[[float], None]:
+    spinner = itertools.cycle("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
+
     def show(percent: float) -> None:
-        end = "\n" if percent >= 100 else ""
-        print(f"\r{step}: {percent:5.1f}%", end=end, file=sys.stderr, flush=True)
+        done = percent >= 100
+        mark, end = ("✓", "\n") if done else (next(spinner), "")
+        print(f"\r{mark} {step}: {percent:5.1f}%", end=end, file=sys.stderr, flush=True)
 
     return show
 
