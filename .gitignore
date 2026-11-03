@@ -1,0 +1,8 @@
+# Copyright (c) 2026 Xavier Beheydt <xavier.beheydt@gmail.com>
+
+__pycache__/
+.ruff_cache/
+.venv/
+.env
+.worktrees/
+.claude/settings.local.json
