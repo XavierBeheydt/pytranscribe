@@ -1,5 +1,12 @@
 # pytranscribe
 
+[![Python 3.13](https://img.shields.io/badge/python-3.13-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://docs.astral.sh/uv/)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://docs.astral.sh/ruff/)
+[![License: MIT](https://img.shields.io/github/license/XavierBeheydt/pytranscribe)](LICENSE)
+[![Version](https://img.shields.io/github/v/tag/XavierBeheydt/pytranscribe?sort=semver&label=version)](https://github.com/XavierBeheydt/pytranscribe/tags)
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Fpytranscribe.beheydt.dev&label=website)](https://pytranscribe.beheydt.dev)
+
 Audio transcription scripts, each one a standalone [uv](https://docs.astral.sh/uv/)
 script: dependencies are declared inline (PEP 723) and installed by `uv run`.
 
