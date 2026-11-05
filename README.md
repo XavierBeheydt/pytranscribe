@@ -9,8 +9,15 @@
 
 Audio transcription scripts, each one a standalone [uv](https://docs.astral.sh/uv/)
 script: dependencies are declared inline (PEP 723) and installed by `uv run`.
+Scripts are named after their use case:
 
-## pytranscribe-whisperx
+| Script | Use case | Engine | Status |
+|---|---|---|---|
+| `pytranscribe-meeting.py` | recordings with several speakers, named | WhisperX | available |
+| `pytranscribe-live.py` | real time, from a microphone or a stream | faster-whisper | planned ([#5](https://github.com/XavierBeheydt/pytranscribe/issues/5), [#6](https://github.com/XavierBeheydt/pytranscribe/issues/6)) |
+| `pytranscribe-bot.py` | voice messages from a chat | faster-whisper | planned ([#7](https://github.com/XavierBeheydt/pytranscribe/issues/7)) |
+
+## pytranscribe-meeting
 
 Transcribes an audio file with [WhisperX](https://github.com/m-bain/whisperX):
 transcription, word alignment, then speaker diarization with
@@ -30,7 +37,7 @@ transcription, word alignment, then speaker diarization with
 ### Usage
 
 ```sh
-uv run pytranscribe-whisperx.py reunion.m4a
+uv run pytranscribe-meeting.py reunion.m4a
 ```
 
 Any format ffmpeg reads works (m4a, mp3, wav, mp4…). The transcript is written
@@ -66,7 +73,7 @@ Name for SPEAKER_01 (Enter to keep): Guillaume
 To rename them later, without transcribing again (the file comes first):
 
 ```sh
-uv run pytranscribe-whisperx.py reunion.md --rename SPEAKER_00=Xavier SPEAKER_01=Guillaume
+uv run pytranscribe-meeting.py reunion.md --rename SPEAKER_00=Xavier SPEAKER_01=Guillaume
 ```
 
 ## License
