@@ -387,26 +387,78 @@
         en: "pytranscribe — local meeting transcription"
       };
       var demos = {
-        fr: {
-          audio: "reunion.m4a", text: "reunion.md", flags: "",
-          report: [["SPEAKER_00", "0:00:07", "Bonjour à tous, merci d'être là."], ["SPEAKER_01", "0:00:05", "Merci. J'ai préparé un tableau."]],
-          names: ["Alice", "Bruno"],
-          lines: [
-            ["Alice", "Bonjour à tous, merci d'être là. On commence par le budget."],
-            ["Bruno", "Merci. J'ai préparé un tableau avec les dépenses de chaque équipe."],
-            ["Alice", "Parfait, tu peux nous le présenter ?"]
-          ]
-        },
-        en: {
-          audio: "meeting.m4a", text: "meeting.md", flags: " -l en",
-          report: [["SPEAKER_00", "0:00:07", "Hi everyone, thanks for joining."], ["SPEAKER_01", "0:00:05", "Thanks. I put together a table."]],
-          names: ["Alice", "Bob"],
-          lines: [
-            ["Alice", "Hi everyone, thanks for joining. Let's start with the budget."],
-            ["Bob", "Thanks. I put together a table with each team's spending."],
-            ["Alice", "Great, can you walk us through it?"]
-          ]
-        }
+        fr: [
+          {
+            script: "pytranscribe-meeting.py",
+            audio: "reunion.m4a", text: "reunion.md", flags: "",
+            steps: ["transcribe", "align", "diarize"],
+            report: [["SPEAKER_00", "0:00:07", "Bonjour à tous, merci d'être là."], ["SPEAKER_01", "0:00:05", "Merci. J'ai préparé un tableau."]],
+            names: ["Alice", "Bruno"],
+            lines: [
+              ["Alice", "Bonjour à tous, merci d'être là. On commence par le budget."],
+              ["Bruno", "Merci. J'ai préparé un tableau avec les dépenses de chaque équipe."],
+              ["Alice", "Parfait, tu peux nous le présenter ?"]
+            ]
+          },
+          {
+            script: "pytranscribe-live.py",
+            audio: "stream.m4a", text: "live.md", flags: "",
+            steps: ["transcribe"],
+            report: [],
+            names: [],
+            lines: [
+              ["Alice", "En direct : nous sommes en train de discuter du projet."],
+              ["Bob", "Oui, et ça fonctionne en temps réel !"]
+            ]
+          },
+          {
+            script: "pytranscribe-bot.py",
+            audio: "voice_note.ogg", text: "bot.md", flags: "",
+            steps: ["transcribe"],
+            report: [],
+            names: [],
+            lines: [
+              ["Alice", "Voici un message vocal à transcrire."],
+              ["Bot", "Transcription terminée !"]
+            ]
+          }
+        ],
+        en: [
+          {
+            script: "pytranscribe-meeting.py",
+            audio: "meeting.m4a", text: "meeting.md", flags: " -l en",
+            steps: ["transcribe", "align", "diarize"],
+            report: [["SPEAKER_00", "0:00:07", "Hi everyone, thanks for joining."], ["SPEAKER_01", "0:00:05", "Thanks. I put together a table."]],
+            names: ["Alice", "Bob"],
+            lines: [
+              ["Alice", "Hi everyone, thanks for joining. Let's start with the budget."],
+              ["Bob", "Thanks. I put together a table with each team's spending."],
+              ["Alice", "Great, can you walk us through it?"]
+            ]
+          },
+          {
+            script: "pytranscribe-live.py",
+            audio: "stream.m4a", text: "live.md", flags: "",
+            steps: ["transcribe"],
+            report: [],
+            names: [],
+            lines: [
+              ["Alice", "Live: we are discussing the project."],
+              ["Bob", "Yes, and it works in real time!"]
+            ]
+          },
+          {
+            script: "pytranscribe-bot.py",
+            audio: "voice_note.ogg", text: "bot.md", flags: "",
+            steps: ["transcribe"],
+            report: [],
+            names: [],
+            lines: [
+              ["Alice", "Here is a voice message to transcribe."],
+              ["Bot", "Transcription complete!"]
+            ]
+          }
+        ]
       };
       var run = 0;
 
@@ -450,20 +502,37 @@
         await sleep(350, id);
       }
 
-      async function play(id, demo) {
-        term.textContent = "";
-        await command("ffmpeg -f pulse -i default " + demo.audio, id);
-        var rec = line("rec");
-        for (var t = 0; t <= 24; t++) {
-          var meter = "";
-          for (var b = 0; b < 12; b++) meter += "▁▂▃▄▅▆▇"[Math.floor(Math.random() * 7)];
-          rec.textContent = "● rec  00:00:" + String(t >> 1).padStart(2, "0") + "  " + meter;
-          await sleep(110, id);
+      async function play(id, demos, index) {
+        if (index >= demos.length) {
+          if (reduced) return;
+          await sleep(5000, id);
+          play(id, demos, 0).catch(function () {});
+          return;
         }
-        line("m", "^C");
+        
+        var demo = demos[index];
+        term.textContent = "";
+        
+        if (demo.script === "pytranscribe-meeting.py") {
+          await command("ffmpeg -f pulse -i default " + demo.audio, id);
+          var rec = line("rec");
+          for (var t = 0; t <= 24; t++) {
+            var meter = "";
+            for (var b = 0; b < 12; b++) meter += "▁▂▃▄▅▆▇"[Math.floor(Math.random() * 7)];
+            rec.textContent = "● rec  00:00:" + String(t >> 1).padStart(2, "0") + "  " + meter;
+            await sleep(110, id);
+          }
+          line("m", "^C");
+        } else if (demo.script === "pytranscribe-live.py") {
+          line("m", "// Live transcription from microphone or stream");
+          await sleep(500, id);
+        } else if (demo.script === "pytranscribe-bot.py") {
+          line("m", "// Voice message received");
+          await sleep(500, id);
+        }
 
-        await command("uv run pytranscribe-meeting.py " + demo.audio + demo.flags, id);
-        var steps = ["transcribe", "align", "diarize"];
+        await command("uv run " + demo.script + " " + demo.audio + demo.flags, id);
+        var steps = demo.steps;
         for (var s = 0; s < steps.length; s++) {
           var bar = line("m");
           for (var p = 0, f = 0; p <= 100; p += 5, f++) {
@@ -471,25 +540,35 @@
             await sleep(45, id);
           }
         }
-        line("", demo.text);
-        line("", demo.report.length + " speakers found:");
-        demo.report.forEach(function (r) { line("m", "  " + r[0] + "  " + r[1] + "  \"" + r[2] + "\""); });
-        for (var n = 0; n < demo.names.length; n++) {
-          var ask = line("", "Name for " + demo.report[n][0] + " (Enter to keep): ");
-          await sleep(600, id);
-          await type(span(ask, "s"), demo.names[n], id, 90);
+        
+        if (demo.report.length > 0) {
+          line("", demo.text);
+          line("", demo.report.length + " speakers found:");
+          demo.report.forEach(function (r) { line("m", "  " + r[0] + "  " + r[1] + "  \"" + r[2] + "\""); });
+          for (var n = 0; n < demo.names.length; n++) {
+            var ask = line("", "Name for " + demo.report[n][0] + " (Enter to keep): ");
+            await sleep(600, id);
+            await type(span(ask, "s"), demo.names[n], id, 90);
+          }
+          await command("cat " + demo.text, id);
+          for (var l = 0; l < demo.lines.length; l++) {
+            var out = line();
+            span(out, "s", "**" + demo.lines[l][0] + "**: ");
+            await type(span(out), demo.lines[l][1], id, 24);
+            line("", " ");
+          }
+        } else {
+          line("", demo.text);
+          for (var l = 0; l < demo.lines.length; l++) {
+            var out = line();
+            span(out, "s", "**" + demo.lines[l][0] + "**: ");
+            await type(span(out), demo.lines[l][1], id, 24);
+            line("", " ");
+          }
         }
-
-        await command("cat " + demo.text, id);
-        for (var l = 0; l < demo.lines.length; l++) {
-          var out = line();
-          span(out, "s", "**" + demo.lines[l][0] + "**: ");
-          await type(span(out), demo.lines[l][1], id, 24);
-          line("", " ");
-        }
-        if (reduced) return;
-        await sleep(5000, id);
-        play(id, demo).catch(function () {});
+        
+        await sleep(2000, id);
+        play(id, demos, index + 1).catch(function () {});
       }
 
       var buttons = document.querySelectorAll("[data-set-lang]");
@@ -500,7 +579,7 @@
         for (var i = 0; i < buttons.length; i++) {
           buttons[i].setAttribute("aria-pressed", String(buttons[i].getAttribute("data-set-lang") === lang));
         }
-        play(++run, demos[lang]).catch(function () {});
+        play(++run, demos[lang], 0).catch(function () {});
       }
 
       for (var i = 0; i < buttons.length; i++) {
