@@ -272,6 +272,25 @@
     .scripts a {
       color: var(--accent);
     }
+
+    .term-nav {
+      font: inherit;
+      background: none;
+      border: 0;
+      color: var(--muted);
+      padding: 0 0.75rem;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: color 0.15s;
+    }
+
+    .term-nav:hover {
+      color: var(--fg);
+    }
+
+    .term-nav:active {
+      color: var(--accent);
+    }
   </style>
 </head>
 <body>
@@ -292,7 +311,7 @@
     </div>
 
     <div class="term" aria-hidden="true">
-      <div class="term__bar"><i></i><i></i><i></i><span id="term-path">~/meetings</span></div>
+      <div class="term__bar"><i></i><i></i><i></i><span id="term-path">~/meetings</span><button class="term-nav" id="prev-demo" aria-label="Previous demo">‹</button><button class="term-nav" id="next-demo" aria-label="Next demo">›</button></div>
       <div class="term__body" id="term"></div>
     </div>
 
@@ -467,6 +486,7 @@
         ]
       };
       var run = 0;
+      var currentDemoIndex = 0;
 
       function sleep(ms, id) {
         return new Promise(function (resolve, reject) {
@@ -517,6 +537,7 @@
         }
         
         var demo = demos[index];
+        currentDemoIndex = index;
         term.textContent = "";
         document.getElementById("term-path").textContent = demo.path;
         
@@ -597,6 +618,18 @@
           apply(lang);
         });
       }
+
+      document.getElementById("prev-demo").addEventListener("click", function () {
+        var lang = root.lang;
+        var nextIndex = currentDemoIndex > 0 ? currentDemoIndex - 1 : demos[lang].length - 1;
+        play(++run, demos[lang], nextIndex).catch(function () {});
+      });
+
+      document.getElementById("next-demo").addEventListener("click", function () {
+        var lang = root.lang;
+        var nextIndex = currentDemoIndex < demos[lang].length - 1 ? currentDemoIndex + 1 : 0;
+        play(++run, demos[lang], nextIndex).catch(function () {});
+      });
 
       apply(root.lang);
     })();
