@@ -22,15 +22,16 @@
     })();
   </script>
 
-  <title>pytranscribe — local meeting transcription</title>
-  <meta name="description" content="A small uv script that transcribes audio locally with WhisperX: timestamps, speakers, names. Un petit script uv qui transcrit l'audio en local avec WhisperX.">
+  <title>pytranscribe — local audio transcription</title>
+  <meta name="description" content="Small uv scripts that transcribe audio locally: meetings with named speakers, real time, voice messages. Petits scripts uv qui transcrivent l'audio en local.">
+  <meta name="keywords" content="AI, IA, artificial intelligence, intelligence artificielle, transcription, speech to text, reconnaissance vocale, Whisper, WhisperX, faster-whisper, speaker diarization, diarisation, pyannote, meeting transcription, transcription de réunion, voice message, message vocal, WhatsApp, real-time transcription, transcription en temps réel, local AI, IA locale, offline, privacy, confidentialité, open source, Python, uv, PEP 723, MIT">
   <meta name="theme-color" content="#111418">
   <link rel="canonical" href="https://pytranscribe.beheydt.dev/">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://pytranscribe.beheydt.dev/">
   <meta property="og:site_name" content="Beheydt.DEV">
-  <meta property="og:title" content="pytranscribe — transcribe your meetings, locally">
-  <meta property="og:description" content="A small uv script: WhisperX transcription, speaker diarization, named speakers. Nothing leaves your machine.">
+  <meta property="og:title" content="pytranscribe — transcribe audio, locally">
+  <meta property="og:description" content="Small uv scripts: meetings with named speakers, real time, voice messages. Nothing leaves your machine.">
   <link rel="icon" href="favicon.ico" sizes="48x48">
   <link rel="preload" href="assets/fonts/jetbrains-mono-latin-wght.woff2" as="font" type="font/woff2" crossorigin>
 
@@ -77,7 +78,7 @@
     a { color: var(--fg); text-decoration-color: var(--accent); text-underline-offset: 3px; }
     a:hover { color: var(--accent); }
     .accent { color: var(--accent); }
-    code { font: inherit; color: var(--fg); white-space: nowrap; }
+    code { font: inherit; color: var(--fg); overflow-wrap: anywhere; }
 
     .top { display: flex; justify-content: flex-end; padding: 20px 16px 0; }
 
@@ -163,14 +164,34 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 10px 14px;
+      padding: 4px 8px 4px 14px;
       border-bottom: 1px solid var(--line);
       color: var(--muted);
       font-size: 0.75rem;
     }
 
-    .term__bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
-    .term__bar span { margin-left: auto; }
+    .term__dots { display: flex; gap: 6px; }
+    .term__dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+
+    .term__nav { display: flex; align-items: center; margin-left: auto; }
+
+    .term__nav button {
+      font: inherit;
+      font-size: 1rem;
+      line-height: 1;
+      color: var(--accent);
+      background: none;
+      border: 0;
+      border-radius: 6px;
+      min-width: 2rem;
+      min-height: 2.5rem;
+      cursor: pointer;
+      transition: color 0.15s, background-color 0.15s;
+    }
+
+    .term__nav button:hover { background: rgba(224, 123, 57, 0.16); }
+
+    .term__path { color: var(--fg); }
 
     .term__body {
       height: 22.5rem;
@@ -193,8 +214,25 @@
     section { margin-bottom: 2.5rem; }
     section p { color: var(--muted); margin: 0 0 1rem; font-size: 0.9375rem; }
 
-    .points { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.75rem; }
-    .points li { color: var(--muted); font-size: 0.9375rem; padding-left: 1.5rem; position: relative; }
+    .cards { display: grid; gap: 1rem; }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+      padding: 1rem 1.1rem;
+    }
+
+    .card__head { margin-bottom: 0.4rem; }
+
+    .card__name { color: var(--accent); font-weight: 700; font-size: 0.9375rem; }
+
+
+
+    .card__meta { margin: 0 0 0.75rem; font-size: 0.8125rem; }
+
+    .points { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.5rem; }
+    .points li { color: var(--muted); font-size: 0.875rem; padding-left: 1.5rem; position: relative; }
     .points li::before { content: "→"; position: absolute; left: 0; color: var(--accent); }
     .points b { color: var(--fg); font-weight: 600; }
 
@@ -234,6 +272,7 @@
     @media (max-width: 480px) {
       .links { flex-direction: column; }
       .links a { justify-content: center; }
+      .term__dots { display: none; }
     }
 
     @keyframes blink { 50% { opacity: 0; } }
@@ -254,46 +293,89 @@
   <main>
     <div class="hero">
       <p class="wordmark">pytranscribe<span class="accent">_</span></p>
-      <p class="status"><span class="status__slashes" aria-hidden="true">//</span> whisperX · pyannote · uv</p>
-      <h1><span lang="fr">Transcrivez vos réunions,<br>en local.</span><span lang="en">Transcribe your meetings,<br>locally.</span><span class="cursor" aria-hidden="true"></span></h1>
-      <p class="lead" lang="fr">Un petit script Python, un seul fichier lancé avec uv&nbsp;: il transcrit un enregistrement, repère qui parle, et vous laisse mettre un nom sur chaque voix. Rien ne quitte votre machine.</p>
-      <p class="lead" lang="en">A small Python script, one file run with uv: it transcribes a recording, finds who speaks when, and lets you put a name on each voice. Nothing leaves your machine.</p>
+      <p class="status"><span class="status__slashes" aria-hidden="true">//</span> uv · whisperX · faster-whisper</p>
+      <h1><span lang="fr">Transcrivez l'audio,<br>en local.</span><span lang="en">Transcribe audio,<br>locally.</span><span class="cursor" aria-hidden="true"></span></h1>
+      <p class="lead" lang="fr">De petits scripts Python, un fichier chacun, lancés avec uv&nbsp;: une réunion avec ses intervenants, un flux en temps réel, un message vocal. Rien ne quitte votre machine.</p>
+      <p class="lead" lang="en">Small Python scripts, one file each, run with uv: a meeting with its speakers, a live stream, a voice message. Nothing leaves your machine.</p>
     </div>
 
-    <div class="term" aria-hidden="true">
-      <div class="term__bar"><i></i><i></i><i></i><span>~/meetings</span></div>
-      <div class="term__body" id="term"></div>
+    <div class="term">
+      <div class="term__bar">
+        <div class="term__dots" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="term__nav">
+          <button type="button" id="prev-demo" aria-label="Previous script / Script précédent">&#8249;</button>
+          <span class="term__path" id="term-path" aria-live="off">~/meetings</span>
+          <button type="button" id="next-demo" aria-label="Next script / Script suivant">&#8250;</button>
+        </div>
+      </div>
+      <div class="term__body" id="term" aria-hidden="true"></div>
     </div>
 
     <section>
-      <h2><span lang="fr">Ce qu'il fait</span><span lang="en">What it does</span></h2>
-      <ul class="points" lang="fr">
-        <li><b>Transcription</b> WhisperX, horodatée au mot près, sur GPU si disponible.</li>
-        <li><b>Intervenants</b> détectés par pyannote, avec un rapport&nbsp;: temps de parole et première phrase de chacun.</li>
-        <li><b>Des noms</b> à la place de <code>SPEAKER_00</code>, à la fin de la transcription ou plus tard avec <code>--rename</code>.</li>
-        <li><b>Tous les formats</b> que lit ffmpeg (m4a, mp3, wav, mp4…), 41 langues, export Markdown ou texte.</li>
-      </ul>
-      <ul class="points" lang="en">
-        <li><b>Transcription</b> with WhisperX, word-level timestamps, on GPU when available.</li>
-        <li><b>Speakers</b> found by pyannote, with a report: speaking time and first sentence of each.</li>
-        <li><b>Names</b> instead of <code>SPEAKER_00</code>, right after the transcription or later with <code>--rename</code>.</li>
-        <li><b>Any format</b> ffmpeg reads (m4a, mp3, wav, mp4…), 41 languages, Markdown or text output.</li>
-      </ul>
+      <h2>Scripts</h2>
+      <div class="cards">
+        <article class="card">
+          <div class="card__head">
+            <span class="card__name">pytranscribe-meeting.py</span>
+          </div>
+          <p class="card__meta"><span lang="fr">Un enregistrement, plusieurs voix. Moteur&nbsp;: WhisperX + pyannote.</span><span lang="en">One recording, several voices. Engine: WhisperX + pyannote.</span></p>
+          <ul class="points">
+            <li lang="fr"><b>Horodatage au mot près</b>, sur GPU si disponible.</li>
+            <li lang="en"><b>Word-level timestamps</b>, on GPU when available.</li>
+            <li lang="fr"><b>Intervenants</b> détectés, avec temps de parole et première phrase de chacun.</li>
+            <li lang="en"><b>Speakers</b> found, with speaking time and first sentence of each.</li>
+            <li lang="fr"><b>Des noms</b> à la place de <code>SPEAKER_00</code>, à la fin ou plus tard avec <code>--rename</code>.</li>
+            <li lang="en"><b>Names</b> instead of <code>SPEAKER_00</code>, at the end or later with <code>--rename</code>.</li>
+            <li lang="fr"><b>Tous les formats</b> que lit ffmpeg, 41 langues, export Markdown ou texte.</li>
+            <li lang="en"><b>Any format</b> ffmpeg reads, 41 languages, Markdown or text output.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <div class="card__head">
+            <span class="card__name">pytranscribe-live.py</span>
+          </div>
+          <p class="card__meta"><span lang="fr">Le texte au fil de la parole. Moteur&nbsp;: faster-whisper.</span><span lang="en">Text as it is spoken. Engine: faster-whisper.</span></p>
+          <ul class="points">
+            <li lang="fr"><b>Micro ou flux</b> (radio, HLS…), sous Linux, macOS et Windows.</li>
+            <li lang="en"><b>Microphone or stream</b> (radio, HLS…), on Linux, macOS and Windows.</li>
+            <li lang="fr"><b>Une phrase à chaque pause</b>, avec son horodatage.</li>
+            <li lang="en"><b>One sentence at each pause</b>, with its timestamp.</li>
+            <li lang="fr"><b>La transcription complète</b> est écrite à l'arrêt.</li>
+            <li lang="en"><b>The full transcript</b> is written when you stop.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <div class="card__head">
+            <span class="card__name">pytranscribe-bot.py</span>
+          </div>
+          <p class="card__meta"><span lang="fr">Un message vocal en entrée, le texte en retour. Moteur&nbsp;: faster-whisper.</span><span lang="en">A voice message in, the text back. Engine: faster-whisper.</span></p>
+          <ul class="points">
+            <li lang="fr"><b>Répond avec la transcription</b>, langue détectée automatiquement.</li>
+            <li lang="en"><b>Replies with the transcript</b>, language detected automatically.</li>
+            <li lang="fr"><b>Expéditeurs autorisés</b> uniquement.</li>
+            <li lang="en"><b>Allowed senders</b> only.</li>
+            <li lang="fr"><b>Tourne chez vous</b>&nbsp;: l'audio ne passe par aucun service de transcription.</li>
+            <li lang="en"><b>Runs at home</b>: the audio goes through no transcription service.</li>
+          </ul>
+        </article>
+      </div>
     </section>
 
     <section>
       <h2><span lang="fr">Essayer</span><span lang="en">Try it</span></h2>
       <p lang="fr">Il faut <a href="https://docs.astral.sh/uv/">uv</a> et ffmpeg. uv installe le reste au premier lancement&nbsp;:</p>
       <p lang="en">You need <a href="https://docs.astral.sh/uv/">uv</a> and ffmpeg. uv installs the rest on the first run:</p>
-      <pre>uv run https://raw.githubusercontent.com/XavierBeheydt/pytranscribe/main/pytranscribe-whisperx.py audio.m4a</pre>
+      <pre>uv run https://raw.githubusercontent.com/XavierBeheydt/pytranscribe/main/pytranscribe-meeting.py audio.m4a</pre>
       <p lang="fr">La détection des intervenants demande un token Hugging Face en lecture&nbsp;: tout est expliqué dans le <a href="https://github.com/XavierBeheydt/pytranscribe#readme">README</a>.</p>
       <p lang="en">Speaker detection needs a Hugging Face read token: the <a href="https://github.com/XavierBeheydt/pytranscribe#readme">README</a> explains it all.</p>
     </section>
 
     <section>
       <h2><span lang="fr">Une brique</span><span lang="en">A building block</span></h2>
-      <p lang="fr">Ce n'est pas le projet du siècle&nbsp;: c'est une petite brique, pensée pour être branchée sur plus grand. Prochaines étapes&nbsp;: <a href="https://github.com/XavierBeheydt/pytranscribe/issues/5">temps réel au micro</a> ou <a href="https://github.com/XavierBeheydt/pytranscribe/issues/6">sur un flux</a>, <a href="https://github.com/XavierBeheydt/pytranscribe/issues/8">détection de la langue</a>, <a href="https://github.com/XavierBeheydt/pytranscribe/issues/7">un bot pour les messages vocaux</a>.</p>
-      <p lang="en">Not the project of the century: a small building block, meant to be plugged into something bigger. Next: <a href="https://github.com/XavierBeheydt/pytranscribe/issues/5">real time from a microphone</a> or <a href="https://github.com/XavierBeheydt/pytranscribe/issues/6">a stream</a>, <a href="https://github.com/XavierBeheydt/pytranscribe/issues/8">language detection</a>, <a href="https://github.com/XavierBeheydt/pytranscribe/issues/7">a voice-message bot</a>.</p>
+      <p lang="fr">Ce n'est pas le projet du siècle&nbsp;: ce sont de petites briques, pensées pour être branchées sur plus grand. Un script par usage, chacun avec le moteur qui lui convient.</p>
+      <p lang="en">Not the project of the century: small building blocks, meant to be plugged into something bigger. One script per use case, each with the engine that fits it.</p>
     </section>
 
     <ul class="links">
@@ -313,34 +395,86 @@
     (function () {
       var root = document.documentElement;
       var term = document.getElementById("term");
+      var pathEl = document.getElementById("term-path");
       var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
       var frames = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏";
       var titles = {
-        fr: "pytranscribe — transcription de réunions en local",
-        en: "pytranscribe — local meeting transcription"
+        fr: "pytranscribe — transcription audio en local",
+        en: "pytranscribe — local audio transcription"
       };
+      var meter = "▁▂▃▄▅▆▇";
+
+      // Ops: c = typed command, o = output line (k = style), rec = recording meter,
+      // p = progress steps, a = prompt with a typed answer, t = typed transcript line,
+      // l = live line (time, text), x = typed plain line, w = wait.
       var demos = {
-        fr: {
-          audio: "reunion.m4a", text: "reunion.md", flags: "",
-          report: [["SPEAKER_00", "0:00:07", "Bonjour à tous, merci d'être là."], ["SPEAKER_01", "0:00:05", "Merci. J'ai préparé un tableau."]],
-          names: ["Alice", "Bruno"],
-          lines: [
-            ["Alice", "Bonjour à tous, merci d'être là. On commence par le budget."],
-            ["Bruno", "Merci. J'ai préparé un tableau avec les dépenses de chaque équipe."],
-            ["Alice", "Parfait, tu peux nous le présenter ?"]
-          ]
-        },
-        en: {
-          audio: "meeting.m4a", text: "meeting.md", flags: " -l en",
-          report: [["SPEAKER_00", "0:00:07", "Hi everyone, thanks for joining."], ["SPEAKER_01", "0:00:05", "Thanks. I put together a table."]],
-          names: ["Alice", "Bob"],
-          lines: [
-            ["Alice", "Hi everyone, thanks for joining. Let's start with the budget."],
-            ["Bob", "Thanks. I put together a table with each team's spending."],
-            ["Alice", "Great, can you walk us through it?"]
-          ]
-        }
+        fr: [
+          { path: "~/meetings", ops: [
+            { c: "ffmpeg -f pulse -i default reunion.m4a" }, { rec: 24 }, { o: "^C", k: "m" },
+            { c: "uv run pytranscribe-meeting.py reunion.m4a" },
+            { p: ["transcribe", "align", "diarize"] },
+            { o: "reunion.md" }, { o: "2 speakers found:" },
+            { o: "  SPEAKER_00  0:00:07  \"Bonjour à tous, merci d'être là.\"", k: "m" },
+            { o: "  SPEAKER_01  0:00:05  \"Merci. J'ai préparé un tableau.\"", k: "m" },
+            { a: "Name for SPEAKER_00 (Enter to keep): ", v: "Alice" },
+            { a: "Name for SPEAKER_01 (Enter to keep): ", v: "Bruno" },
+            { c: "cat reunion.md" },
+            { t: ["Alice", "Bonjour à tous, merci d'être là. On commence par le budget."] },
+            { t: ["Bruno", "Merci. J'ai préparé un tableau avec les dépenses de chaque équipe."] },
+            { t: ["Alice", "Parfait, tu peux nous le présenter ?"] }
+          ] },
+          { path: "~/live", ops: [
+            { c: "uv run pytranscribe-live.py" },
+            { o: "● listening (fr) — Ctrl-C to stop", k: "rec" },
+            { w: 1200 }, { l: ["00:00:03", "Bonjour à tous, merci d'être là."] },
+            { w: 1400 }, { l: ["00:00:08", "On commence par le budget de l'année prochaine."] },
+            { w: 1600 }, { l: ["00:00:15", "Bruno, tu peux nous présenter ton tableau ?"] },
+            { w: 900 }, { o: "^C", k: "m" }, { o: "live.md" }
+          ] },
+          { path: "~/vocaux", ops: [
+            { c: "uv run pytranscribe-bot.py" },
+            { o: "✓ connected — waiting for voice messages", k: "m" }, { w: 1400 },
+            { o: "◂ voice message from Alice (0:12)" },
+            { p: ["transcribe"] },
+            { o: "▸ replied:" },
+            { x: "Salut, je serai en retard de dix minutes, commencez sans moi." }
+          ] }
+        ],
+        en: [
+          { path: "~/meetings", ops: [
+            { c: "ffmpeg -f pulse -i default meeting.m4a" }, { rec: 24 }, { o: "^C", k: "m" },
+            { c: "uv run pytranscribe-meeting.py meeting.m4a -l en" },
+            { p: ["transcribe", "align", "diarize"] },
+            { o: "meeting.md" }, { o: "2 speakers found:" },
+            { o: "  SPEAKER_00  0:00:07  \"Hi everyone, thanks for joining.\"", k: "m" },
+            { o: "  SPEAKER_01  0:00:05  \"Thanks. I put together a table.\"", k: "m" },
+            { a: "Name for SPEAKER_00 (Enter to keep): ", v: "Alice" },
+            { a: "Name for SPEAKER_01 (Enter to keep): ", v: "Bob" },
+            { c: "cat meeting.md" },
+            { t: ["Alice", "Hi everyone, thanks for joining. Let's start with the budget."] },
+            { t: ["Bob", "Thanks. I put together a table with each team's spending."] },
+            { t: ["Alice", "Great, can you walk us through it?"] }
+          ] },
+          { path: "~/live", ops: [
+            { c: "uv run pytranscribe-live.py" },
+            { o: "● listening (en) — Ctrl-C to stop", k: "rec" },
+            { w: 1200 }, { l: ["00:00:03", "Hi everyone, thanks for joining."] },
+            { w: 1400 }, { l: ["00:00:08", "Let's start with next year's budget."] },
+            { w: 1600 }, { l: ["00:00:15", "Bob, can you walk us through your table?"] },
+            { w: 900 }, { o: "^C", k: "m" }, { o: "live.md" }
+          ] },
+          { path: "~/voice-notes", ops: [
+            { c: "uv run pytranscribe-bot.py" },
+            { o: "✓ connected — waiting for voice messages", k: "m" }, { w: 1400 },
+            { o: "◂ voice message from Alice (0:12)" },
+            { p: ["transcribe"] },
+            { o: "▸ replied:" },
+            { x: "Hey, I'll be ten minutes late, start without me." }
+          ] }
+        ]
       };
+
+      var index = 0;
       var run = 0;
 
       function sleep(ms, id) {
@@ -375,54 +509,65 @@
         }
       }
 
-      async function command(text, id) {
-        var el = line();
-        span(el, "p", "$ ");
-        await sleep(500, id);
-        await type(span(el), text, id, 40);
-        await sleep(350, id);
+      async function exec(op, id) {
+        if (op.c !== undefined) {
+          var cmd = line();
+          span(cmd, "p", "$ ");
+          await sleep(500, id);
+          await type(span(cmd), op.c, id, 40);
+          await sleep(350, id);
+        } else if (op.o !== undefined) {
+          line(op.k || "", op.o);
+        } else if (op.rec) {
+          var rec = line("rec");
+          for (var t = 0; t <= (reduced ? 0 : op.rec); t++) {
+            var bars = "";
+            for (var b = 0; b < 12; b++) bars += meter[Math.floor(Math.random() * 7)];
+            rec.textContent = "● rec  00:00:" + String(t >> 1).padStart(2, "0") + "  " + bars;
+            await sleep(110, id);
+          }
+        } else if (op.p) {
+          for (var s = 0; s < op.p.length; s++) {
+            var bar = line("m");
+            for (var p = reduced ? 100 : 0, f = 0; p <= 100; p += 5, f++) {
+              bar.textContent = (p < 100 ? frames[f % 10] : "✓") + " " + op.p[s] + ": " + p.toFixed(1).padStart(5) + "%";
+              await sleep(45, id);
+            }
+          }
+        } else if (op.a) {
+          var ask = line("", op.a);
+          await sleep(600, id);
+          await type(span(ask, "s"), op.v, id, 90);
+        } else if (op.t) {
+          var out = line();
+          span(out, "s", "**" + op.t[0] + "**: ");
+          await type(span(out), op.t[1], id, 24);
+          line("", " ");
+        } else if (op.l) {
+          var live = line();
+          span(live, "m", "[" + op.l[0] + "] ");
+          await type(span(live), op.l[1], id, 16);
+        } else if (op.x) {
+          await type(line(), op.x, id, 24);
+        } else if (op.w) {
+          await sleep(op.w, id);
+        }
       }
 
-      async function play(id, demo) {
-        term.textContent = "";
-        await command("ffmpeg -f pulse -i default " + demo.audio, id);
-        var rec = line("rec");
-        for (var t = 0; t <= 24; t++) {
-          var meter = "";
-          for (var b = 0; b < 12; b++) meter += "▁▂▃▄▅▆▇"[Math.floor(Math.random() * 7)];
-          rec.textContent = "● rec  00:00:" + String(t >> 1).padStart(2, "0") + "  " + meter;
-          await sleep(110, id);
-        }
-        line("m", "^C");
-
-        await command("uv run pytranscribe-whisperx.py " + demo.audio + demo.flags, id);
-        var steps = ["transcribe", "align", "diarize"];
-        for (var s = 0; s < steps.length; s++) {
-          var bar = line("m");
-          for (var p = 0, f = 0; p <= 100; p += 5, f++) {
-            bar.textContent = (p < 100 ? frames[f % 10] : "✓") + " " + steps[s] + ": " + p.toFixed(1).padStart(5) + "%";
-            await sleep(45, id);
-          }
-        }
-        line("", demo.text);
-        line("", demo.report.length + " speakers found:");
-        demo.report.forEach(function (r) { line("m", "  " + r[0] + "  " + r[1] + "  \"" + r[2] + "\""); });
-        for (var n = 0; n < demo.names.length; n++) {
-          var ask = line("", "Name for " + demo.report[n][0] + " (Enter to keep): ");
-          await sleep(600, id);
-          await type(span(ask, "s"), demo.names[n], id, 90);
-        }
-
-        await command("cat " + demo.text, id);
-        for (var l = 0; l < demo.lines.length; l++) {
-          var out = line();
-          span(out, "s", "**" + demo.lines[l][0] + "**: ");
-          await type(span(out), demo.lines[l][1], id, 24);
-          line("", " ");
-        }
+      async function play(id) {
+        var demo = demos[root.lang][index];
+        for (var i = 0; i < demo.ops.length; i++) await exec(demo.ops[i], id);
         if (reduced) return;
         await sleep(5000, id);
-        play(id, demo).catch(function () {});
+        show(index + 1);
+      }
+
+      function show(i) {
+        var list = demos[root.lang];
+        index = (i + list.length) % list.length;
+        term.textContent = "";
+        pathEl.textContent = list[index].path;
+        play(++run).catch(function () {});
       }
 
       var buttons = document.querySelectorAll("[data-set-lang]");
@@ -433,7 +578,7 @@
         for (var i = 0; i < buttons.length; i++) {
           buttons[i].setAttribute("aria-pressed", String(buttons[i].getAttribute("data-set-lang") === lang));
         }
-        play(++run, demos[lang]).catch(function () {});
+        show(index);
       }
 
       for (var i = 0; i < buttons.length; i++) {
@@ -443,6 +588,9 @@
           apply(lang);
         });
       }
+
+      document.getElementById("prev-demo").addEventListener("click", function () { show(index - 1); });
+      document.getElementById("next-demo").addEventListener("click", function () { show(index + 1); });
 
       apply(root.lang);
     })();
