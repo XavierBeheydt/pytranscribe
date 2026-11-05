@@ -28,7 +28,7 @@ LANGUAGES = (
 class Args:
     file: Path
     output_dir: Path
-    lang: str
+    lang: str | None
     format: str
     diarize: bool
     rename: dict[str, str]
@@ -43,7 +43,7 @@ class Args:
             "-o", "--output-dir", type=Path, help="output directory (default: the audio's)"
         )
         parser.add_argument(
-            "-l", "--lang", default="fr", choices=LANGUAGES, help="audio language (default: fr)"
+            "-l", "--lang", choices=LANGUAGES, help="audio language (default: detected)"
         )
         parser.add_argument(
             "--format", default="md", choices=("md", "txt"), help="output format (default: md)"
@@ -85,10 +85,16 @@ def transcribe(args: Args) -> list[dict]:
     compute_type = "float16" if device == "cuda" else "int8"
     model = whisperx.load_model("medium", device, compute_type=compute_type, language=args.lang)
     result = model.transcribe(audio, batch_size=16, progress_callback=progress("transcribe"))
-    align_model, meta = whisperx.load_align_model(language_code=args.lang, device=device)
-    result = whisperx.align(
-        result["segments"], align_model, meta, audio, device, progress_callback=progress("align")
-    )
+    lang = result["language"]
+    print(f"language: {lang}", file=sys.stderr)
+    if lang in LANGUAGES:
+        align_model, meta = whisperx.load_align_model(language_code=lang, device=device)
+        result = whisperx.align(
+            result["segments"], align_model, meta, audio, device,
+            progress_callback=progress("align"),
+        )
+    else:
+        print(f"no alignment model for '{lang}': word timestamps skipped", file=sys.stderr)
     if args.diarize:
         diarize = DiarizationPipeline(token=os.environ.get("HF_TOKEN"), device=device)
         segments = diarize(audio, progress_callback=progress("diarize"))
