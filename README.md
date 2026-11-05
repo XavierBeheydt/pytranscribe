@@ -89,6 +89,9 @@ after it is spoken.
   and files.
 - For the microphone, [PortAudio](https://www.portaudio.com/): bundled on
   Windows and macOS, a system package on Linux (`libportaudio2`, `portaudio`…).
+- An NVIDIA GPU is used when available (`medium` model; on Linux, the CUDA 12
+  libraries are downloaded from PyPI on the first run, about 1 GB); otherwise
+  the CPU (`small` model).
 - No Hugging Face token: there is no speaker detection.
 
 ### Usage
