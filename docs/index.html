@@ -285,7 +285,7 @@
       <h2><span lang="fr">Essayer</span><span lang="en">Try it</span></h2>
       <p lang="fr">Il faut <a href="https://docs.astral.sh/uv/">uv</a> et ffmpeg. uv installe le reste au premier lancement&nbsp;:</p>
       <p lang="en">You need <a href="https://docs.astral.sh/uv/">uv</a> and ffmpeg. uv installs the rest on the first run:</p>
-      <pre>uv run https://raw.githubusercontent.com/XavierBeheydt/pytranscribe/main/pytranscribe-whisperx.py audio.m4a</pre>
+      <pre>uv run https://raw.githubusercontent.com/XavierBeheydt/pytranscribe/main/pytranscribe-meeting.py audio.m4a</pre>
       <p lang="fr">La détection des intervenants demande un token Hugging Face en lecture&nbsp;: tout est expliqué dans le <a href="https://github.com/XavierBeheydt/pytranscribe#readme">README</a>.</p>
       <p lang="en">Speaker detection needs a Hugging Face read token: the <a href="https://github.com/XavierBeheydt/pytranscribe#readme">README</a> explains it all.</p>
     </section>
@@ -395,7 +395,7 @@
         }
         line("m", "^C");
 
-        await command("uv run pytranscribe-whisperx.py " + demo.audio + demo.flags, id);
+        await command("uv run pytranscribe-meeting.py " + demo.audio + demo.flags, id);
         var steps = ["transcribe", "align", "diarize"];
         for (var s = 0; s < steps.length; s++) {
           var bar = line("m");
