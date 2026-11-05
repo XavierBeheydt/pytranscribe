@@ -170,7 +170,7 @@
     }
 
     .term__bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
-    .term__bar span { margin-left: auto; }
+    .term__bar span { margin-left: auto; padding-left: 10px; }
 
     .term__body {
       height: 22.5rem;
@@ -272,30 +272,6 @@
     .scripts a {
       color: var(--accent);
     }
-
-    .term-nav {
-      font: inherit;
-      background: none;
-      border: 0;
-      color: var(--muted);
-      padding: 0 0.25rem;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: color 0.15s;
-      margin: 0;
-    }
-
-    .term-nav:hover {
-      color: var(--fg);
-    }
-
-    .term-nav:active {
-      color: var(--accent);
-    }
-
-    #prev-demo {
-      margin-left: 0.5rem;
-    }
   </style>
 </head>
 <body>
@@ -316,7 +292,7 @@
     </div>
 
     <div class="term" aria-hidden="true">
-      <div class="term__bar"><i></i><i></i><i></i><button class="term-nav" id="prev-demo" aria-label="Previous demo">‹</button><span id="term-path">~/meetings</span><button class="term-nav" id="next-demo" aria-label="Next demo">›</button></div>
+      <div class="term__bar"><i></i><i></i><i></i><span id="term-path"></span></div>
       <div class="term__body" id="term"></div>
     </div>
 
@@ -414,7 +390,7 @@
         fr: [
           {
             script: "pytranscribe-meeting.py",
-            path: "~/meetings",
+            path: "< ~/meetings >",
             audio: "reunion.m4a", text: "reunion.md", flags: "",
             steps: ["transcribe", "align", "diarize"],
             report: [["SPEAKER_00", "0:00:07", "Bonjour à tous, merci d'être là."], ["SPEAKER_01", "0:00:05", "Merci. J'ai préparé un tableau."]],
@@ -427,7 +403,7 @@
           },
           {
             script: "pytranscribe-live.py",
-            path: "~/live",
+            path: "< ~/live >",
             audio: "stream.m4a", text: "live.md", flags: "",
             steps: ["transcribe"],
             report: [],
@@ -439,7 +415,7 @@
           },
           {
             script: "pytranscribe-bot.py",
-            path: "~/bot",
+            path: "< ~/bot >",
             audio: "voice_note.ogg", text: "bot.md", flags: "",
             steps: ["transcribe"],
             report: [],
@@ -453,7 +429,7 @@
         en: [
           {
             script: "pytranscribe-meeting.py",
-            path: "~/meetings",
+            path: "< ~/meetings >",
             audio: "meeting.m4a", text: "meeting.md", flags: " -l en",
             steps: ["transcribe", "align", "diarize"],
             report: [["SPEAKER_00", "0:00:07", "Hi everyone, thanks for joining."], ["SPEAKER_01", "0:00:05", "Thanks. I put together a table."]],
@@ -466,7 +442,7 @@
           },
           {
             script: "pytranscribe-live.py",
-            path: "~/live",
+            path: "< ~/live >",
             audio: "stream.m4a", text: "live.md", flags: "",
             steps: ["transcribe"],
             report: [],
@@ -478,7 +454,7 @@
           },
           {
             script: "pytranscribe-bot.py",
-            path: "~/bot",
+            path: "< ~/bot >",
             audio: "voice_note.ogg", text: "bot.md", flags: "",
             steps: ["transcribe"],
             report: [],
@@ -491,7 +467,6 @@
         ]
       };
       var run = 0;
-      var currentDemoIndex = 0;
 
       function sleep(ms, id) {
         return new Promise(function (resolve, reject) {
@@ -542,7 +517,6 @@
         }
         
         var demo = demos[index];
-        currentDemoIndex = index;
         term.textContent = "";
         document.getElementById("term-path").textContent = demo.path;
         
@@ -623,18 +597,6 @@
           apply(lang);
         });
       }
-
-      document.getElementById("prev-demo").addEventListener("click", function () {
-        var lang = root.lang;
-        var nextIndex = currentDemoIndex > 0 ? currentDemoIndex - 1 : demos[lang].length - 1;
-        play(++run, demos[lang], nextIndex).catch(function () {});
-      });
-
-      document.getElementById("next-demo").addEventListener("click", function () {
-        var lang = root.lang;
-        var nextIndex = currentDemoIndex < demos[lang].length - 1 ? currentDemoIndex + 1 : 0;
-        play(++run, demos[lang], nextIndex).catch(function () {});
-      });
 
       apply(root.lang);
     })();
