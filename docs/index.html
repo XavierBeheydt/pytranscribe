@@ -292,7 +292,7 @@
     </div>
 
     <div class="term" aria-hidden="true">
-      <div class="term__bar"><i></i><i></i><i></i><span>~/meetings</span></div>
+      <div class="term__bar"><i></i><i></i><i></i><span id="term-path">~/meetings</span></div>
       <div class="term__body" id="term"></div>
     </div>
 
@@ -390,6 +390,7 @@
         fr: [
           {
             script: "pytranscribe-meeting.py",
+            path: "~/meetings",
             audio: "reunion.m4a", text: "reunion.md", flags: "",
             steps: ["transcribe", "align", "diarize"],
             report: [["SPEAKER_00", "0:00:07", "Bonjour à tous, merci d'être là."], ["SPEAKER_01", "0:00:05", "Merci. J'ai préparé un tableau."]],
@@ -402,6 +403,7 @@
           },
           {
             script: "pytranscribe-live.py",
+            path: "~",
             audio: "stream.m4a", text: "live.md", flags: "",
             steps: ["transcribe"],
             report: [],
@@ -413,6 +415,7 @@
           },
           {
             script: "pytranscribe-bot.py",
+            path: "~/bot",
             audio: "voice_note.ogg", text: "bot.md", flags: "",
             steps: ["transcribe"],
             report: [],
@@ -426,6 +429,7 @@
         en: [
           {
             script: "pytranscribe-meeting.py",
+            path: "~/meetings",
             audio: "meeting.m4a", text: "meeting.md", flags: " -l en",
             steps: ["transcribe", "align", "diarize"],
             report: [["SPEAKER_00", "0:00:07", "Hi everyone, thanks for joining."], ["SPEAKER_01", "0:00:05", "Thanks. I put together a table."]],
@@ -438,6 +442,7 @@
           },
           {
             script: "pytranscribe-live.py",
+            path: "~",
             audio: "stream.m4a", text: "live.md", flags: "",
             steps: ["transcribe"],
             report: [],
@@ -449,6 +454,7 @@
           },
           {
             script: "pytranscribe-bot.py",
+            path: "~/bot",
             audio: "voice_note.ogg", text: "bot.md", flags: "",
             steps: ["transcribe"],
             report: [],
@@ -512,6 +518,7 @@
         
         var demo = demos[index];
         term.textContent = "";
+        document.getElementById("term-path").textContent = demo.path;
         
         if (demo.script === "pytranscribe-meeting.py") {
           await command("ffmpeg -f pulse -i default " + demo.audio, id);
