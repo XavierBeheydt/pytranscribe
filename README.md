@@ -51,7 +51,7 @@ next to the audio, with the same name (`reunion.md`):
 
 | Option | Default | |
 |---|---|---|
-| `-l`, `--lang` | `fr` | audio language, among those WhisperX can align (`--help` lists them) |
+| `-l`, `--lang` | detected (first 30 s) | force a language, among the 41 WhisperX can align (`--help` lists them); a detected language without alignment model skips the word timestamps |
 | `-o`, `--output-dir` | the audio's directory | where to write the transcript |
 | `--format` | `md` | `md` or `txt` (`[SPEAKER_00] text` lines) |
 | `--no-diarize` | | skip diarization: no speakers, no token needed |
