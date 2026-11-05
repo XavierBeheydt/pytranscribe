@@ -127,6 +127,9 @@ on your machine, so the audio goes through no transcription service.
 
 - [uv](https://docs.astral.sh/uv/) and [ffmpeg](https://ffmpeg.org/).
 - A WhatsApp account for the bot, on a phone you can scan a QR code with.
+- An NVIDIA GPU is used when available (`medium` model; on Linux, the CUDA 12
+  libraries are downloaded from PyPI on the first run, about 1 GB); otherwise
+  the CPU (`small` model).
 - The session file gives full access to that account: it lives in your home
   directory (`~/.pytranscribe-bot/`), never in the repo.
 
