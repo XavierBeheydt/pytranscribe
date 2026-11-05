@@ -13,7 +13,7 @@ Read this before any git, branch, commit, PR or issue operation.
 - Feature and fix branches — one per change, created from `dev`, named
   `<type>/<short-description>` where `<type>` is a Conventional Commits type:
   `feat/`, `fix/`, `docs/`, `refactor/`, `perf/`, `test/`, `build/`, `ci/`,
-  `chore/`, `style/`, `revert/` (e.g. `feat/whisperx-diarization`).
+  `chore/`, `style/`, `revert/` (e.g. `feat/meeting-diarization`).
 - Never enable automatic deletion of merged branches on the remote. Never
   delete a feature or fix branch without asking the user first.
 
@@ -36,7 +36,7 @@ git branch -d feat/my-new-feature
   <https://www.conventionalcommits.org/en/v1.0.0/>. Read that spec when in
   doubt. Format: `type(scope): description`, with `!` after the type or
   scope, or a `BREAKING CHANGE:` footer, for a breaking change. The scope is
-  the script or area touched (`whisperx`, `agents`, `readme`…).
+  the script or area touched (`meeting`, `agents`, `readme`…).
 - Keep commits small and atomic: one coherent change, no unrelated work
   mixed in.
 - Commit a step only after the user has reviewed it.

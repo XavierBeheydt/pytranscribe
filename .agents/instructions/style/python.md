@@ -5,6 +5,8 @@ Applies to every Python script in the repo.
 - One standalone script per file, at the repo root, run with
   `uv run <script>.py`. Shared code is not factored into a module: each
   script stays self-contained.
+- Scripts are named after their use case, not their engine:
+  `pytranscribe-<use-case>.py` (`meeting`, `live`, `bot`…).
 - Each script starts with the copyright header, then a PEP 723 metadata
   block. Dependencies are edited only through the
   [python-deps](../../skills/python-deps/SKILL.md) skill, never by hand:
