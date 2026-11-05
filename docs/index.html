@@ -523,15 +523,16 @@
             await sleep(110, id);
           }
           line("m", "^C");
+          await command("uv run " + demo.script + " " + demo.audio + demo.flags, id);
         } else if (demo.script === "pytranscribe-live.py") {
-          line("m", "// Live transcription from microphone or stream");
+          line("m", "// Live from microphone via pipe");
           await sleep(500, id);
+          await command("ffmpeg -f pulse -i default -f wav - | uv run " + demo.script + " -", id);
         } else if (demo.script === "pytranscribe-bot.py") {
           line("m", "// Voice message received");
           await sleep(500, id);
+          await command("uv run " + demo.script + " " + demo.audio, id);
         }
-
-        await command("uv run " + demo.script + " " + demo.audio + demo.flags, id);
         var steps = demo.steps;
         for (var s = 0; s < steps.length; s++) {
           var bar = line("m");
