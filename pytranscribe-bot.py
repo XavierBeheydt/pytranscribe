@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Self
 
-SESSION = Path.home() / ".pytranscribe-bot" / "session.db"
+SESSION = Path.home() / ".cache" / "pytranscribe" / "bot-session.db"
 
 
 @dataclass
@@ -90,7 +90,7 @@ def main() -> None:
 
     args = Args.parse()
     transcriber = Transcriber(args.lang)
-    SESSION.parent.mkdir(mode=0o700, exist_ok=True)
+    SESSION.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     client = NewClient(str(SESSION))
 
     @client.event(ConnectedEv)

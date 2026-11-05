@@ -131,7 +131,8 @@ on your machine, so the audio goes through no transcription service.
   libraries are downloaded from PyPI on the first run, about 1 GB); otherwise
   the CPU (`small` model).
 - The session file gives full access to that account: it lives in your home
-  directory (`~/.pytranscribe-bot/`), never in the repo.
+  directory (`~/.cache/pytranscribe/`), never in the repo. Losing it (a cache cleaner, say)
+  only means scanning the QR code again.
 
 ### Usage
 
@@ -147,6 +148,33 @@ only, with the transcript.
 |---|---|---|
 | `--allow` | required | a number allowed to use the bot (repeat for several) |
 | `-l`, `--lang` | detected for each message | force a language |
+
+## Cleanup
+
+The scripts install nothing outside caches, all rebuilt by the next `uv run`.
+Paths are those of Linux and macOS (`uv cache dir` prints uv's):
+
+| What | Where | Size |
+|---|---|---|
+| Script environments (torch, CUDA…) | `~/.cache/uv/environments-v2/pytranscribe-*` | 3-7 GB each |
+| Whisper model | `~/.cache/huggingface/hub/models--Systran--faster-whisper-*` | 0.1-3 GB |
+| Diarization model | `~/.cache/huggingface/hub/models--pyannote--*` | 30 MB |
+| Alignment models | `~/.cache/torch` | 0.7 GB |
+| Bot session | `~/.cache/pytranscribe/` | small |
+
+```sh
+rm -rf ~/.cache/uv/environments-v2/pytranscribe-*
+rm -rf ~/.cache/huggingface/hub/models--Systran--faster-whisper-* ~/.cache/huggingface/hub/models--pyannote--*
+rm -rf ~/.cache/torch ~/.cache/pytranscribe
+uv cache prune        # wheels no script needs any more
+hf auth logout        # the Hugging Face token
+```
+
+Every change to a script's dependencies makes uv build a new environment and
+keep the old one, so the first command is worth running from time to time.
+
+To retire the bot, also remove it on the phone: *Settings → Linked devices*.
+Deleting the session file does not unlink the device from the account.
 
 ## License
 
