@@ -409,7 +409,7 @@
         fr: [
           {
             script: "pytranscribe-meeting.py",
-            path: "< meetings >",
+            path: "< ~/meetings >",
             audio: "reunion.m4a", text: "reunion.md", flags: "",
             steps: ["transcribe", "align", "diarize"],
             report: [["SPEAKER_00", "0:00:07", "Bonjour à tous, merci d'être là."], ["SPEAKER_01", "0:00:05", "Merci. J'ai préparé un tableau."]],
@@ -422,7 +422,7 @@
           },
           {
             script: "pytranscribe-live.py",
-            path: "< live >",
+            path: "< ~/live >",
             audio: "stream.m4a", text: "live.md", flags: "",
             steps: ["transcribe"],
             report: [],
@@ -434,7 +434,7 @@
           },
           {
             script: "pytranscribe-bot.py",
-            path: "< bot >",
+            path: "< ~/bot >",
             audio: "voice_note.ogg", text: "bot.md", flags: "",
             steps: ["transcribe"],
             report: [],
@@ -448,7 +448,7 @@
         en: [
           {
             script: "pytranscribe-meeting.py",
-            path: "< meetings >",
+            path: "< ~/meetings >",
             audio: "meeting.m4a", text: "meeting.md", flags: " -l en",
             steps: ["transcribe", "align", "diarize"],
             report: [["SPEAKER_00", "0:00:07", "Hi everyone, thanks for joining."], ["SPEAKER_01", "0:00:05", "Thanks. I put together a table."]],
@@ -461,7 +461,7 @@
           },
           {
             script: "pytranscribe-live.py",
-            path: "< live >",
+            path: "< ~/live >",
             audio: "stream.m4a", text: "live.md", flags: "",
             steps: ["transcribe"],
             report: [],
@@ -473,7 +473,7 @@
           },
           {
             script: "pytranscribe-bot.py",
-            path: "< bot >",
+            path: "< ~/bot >",
             audio: "voice_note.ogg", text: "bot.md", flags: "",
             steps: ["transcribe"],
             report: [],
