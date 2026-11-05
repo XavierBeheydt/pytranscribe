@@ -79,9 +79,10 @@ uv run pytranscribe-meeting.py reunion.md --rename SPEAKER_00=Xavier SPEAKER_01=
 ## pytranscribe-live
 
 Transcribes in real time, from a microphone or a stream, with
-[faster-whisper](https://github.com/SYSTRAN/faster-whisper). A voice activity
-detector cuts the audio at each pause, and each sentence is printed a moment
-after it is spoken.
+[faster-whisper](https://github.com/SYSTRAN/faster-whisper). While you speak,
+the sentence in progress is shown and rewritten about every 1.5 seconds; a
+pause of half a second fixes it, with its timestamp, and the next one starts.
+A sentence with no pause for 15 seconds is cut anyway.
 
 ### Requirements
 
@@ -89,6 +90,9 @@ after it is spoken.
   and files.
 - For the microphone, [PortAudio](https://www.portaudio.com/): bundled on
   Windows and macOS, a system package on Linux (`libportaudio2`, `portaudio`…).
+- An NVIDIA GPU is used when available (`medium` model; on Linux, the CUDA 12
+  libraries are downloaded from PyPI on the first run, about 1 GB); otherwise
+  the CPU (`small` model).
 - No Hugging Face token: there is no speaker detection.
 
 ### Usage
@@ -103,6 +107,9 @@ uv run pytranscribe-live.py https://example.com/radio.m3u8   # stream or file (f
 [00:00:03] Bonjour à tous, merci d'être là.
 [00:00:08] On commence par le budget de l'année prochaine.
 ```
+
+The in-progress line is only shown in a terminal; when the output is piped, only
+the finished sentences are printed.
 
 On Ctrl-C, the full transcript is written to `live-<date>-<time>.md`.
 
