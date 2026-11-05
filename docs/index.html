@@ -241,6 +241,37 @@
     @media (prefers-reduced-motion: reduce) {
       .cursor { animation: none; }
     }
+
+    .scripts {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.875rem;
+    }
+    .scripts th,
+    .scripts td {
+      padding: 0.6rem 0.8rem;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+    }
+    .scripts th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .scripts td {
+      color: var(--fg);
+    }
+    .scripts code {
+      font: inherit;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+    .scripts a {
+      color: var(--accent);
+    }
   </style>
 </head>
 <body>
@@ -291,9 +322,45 @@
     </section>
 
     <section>
+      <h2><span lang="fr">Scripts</span><span lang="en">Scripts</span></h2>
+      <p lang="fr">Des scripts autonomes, un par cas d'usage&nbsp;:</p>
+      <p lang="en">Standalone scripts, one per use case:</p>
+      <table class="scripts">
+        <thead>
+          <tr>
+            <th><span lang="fr">Script</span><span lang="en">Script</span></th>
+            <th><span lang="fr">Usage</span><span lang="en">Use case</span></th>
+            <th><span lang="fr">Moteur</span><span lang="en">Engine</span></th>
+            <th><span lang="fr">Statut</span><span lang="en">Status</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>pytranscribe-meeting.py</code></td>
+            <td><span lang="fr">enregistrements avec plusieurs intervenants, noms</span><span lang="en">recordings with several speakers, named</span></td>
+            <td>WhisperX</td>
+            <td><span lang="fr">disponible</span><span lang="en">available</span></td>
+          </tr>
+          <tr>
+            <td><code>pytranscribe-live.py</code></td>
+            <td><span lang="fr">temps réel, depuis un micro ou un flux</span><span lang="en">real time, from a microphone or a stream</span></td>
+            <td>faster-whisper</td>
+            <td><span lang="fr"><a href="https://github.com/XavierBeheydt/pytranscribe/issues/5">#5</a>, <a href="https://github.com/XavierBeheydt/pytranscribe/issues/6">#6</a></span><span lang="en"><a href="https://github.com/XavierBeheydt/pytranscribe/issues/5">#5</a>, <a href="https://github.com/XavierBeheydt/pytranscribe/issues/6">#6</a></span></td>
+          </tr>
+          <tr>
+            <td><code>pytranscribe-bot.py</code></td>
+            <td><span lang="fr">messages vocaux d'une discussion</span><span lang="en">voice messages from a chat</span></td>
+            <td>faster-whisper</td>
+            <td><span lang="fr"><a href="https://github.com/XavierBeheydt/pytranscribe/issues/7">#7</a></span><span lang="en"><a href="https://github.com/XavierBeheydt/pytranscribe/issues/7">#7</a></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
       <h2><span lang="fr">Une brique</span><span lang="en">A building block</span></h2>
-      <p lang="fr">Ce n'est pas le projet du siècle&nbsp;: c'est une petite brique, pensée pour être branchée sur plus grand. Prochaines étapes&nbsp;: <a href="https://github.com/XavierBeheydt/pytranscribe/issues/5">temps réel au micro</a> ou <a href="https://github.com/XavierBeheydt/pytranscribe/issues/6">sur un flux</a>, <a href="https://github.com/XavierBeheydt/pytranscribe/issues/8">détection de la langue</a>, <a href="https://github.com/XavierBeheydt/pytranscribe/issues/7">un bot pour les messages vocaux</a>.</p>
-      <p lang="en">Not the project of the century: a small building block, meant to be plugged into something bigger. Next: <a href="https://github.com/XavierBeheydt/pytranscribe/issues/5">real time from a microphone</a> or <a href="https://github.com/XavierBeheydt/pytranscribe/issues/6">a stream</a>, <a href="https://github.com/XavierBeheydt/pytranscribe/issues/8">language detection</a>, <a href="https://github.com/XavierBeheydt/pytranscribe/issues/7">a voice-message bot</a>.</p>
+      <p lang="fr">Ce n'est pas le projet du siècle&nbsp;: c'est une petite brique, pensée pour être branchée sur plus grand. Les prochains scripts sont déjà en route (voir tableau ci-dessus).</p>
+      <p lang="en">Not the project of the century: a small building block, meant to be plugged into something bigger. The next scripts are already on their way (see table above).</p>
     </section>
 
     <ul class="links">
