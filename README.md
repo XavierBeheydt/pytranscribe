@@ -134,8 +134,12 @@ on your machine, so the audio goes through no transcription service.
 
 - [uv](https://docs.astral.sh/uv/) and [ffmpeg](https://ffmpeg.org/).
 - A WhatsApp account for the bot, on a phone you can scan a QR code with.
+- An NVIDIA GPU is used when available (`medium` model; on Linux, the CUDA 12
+  libraries are downloaded from PyPI on the first run, about 1 GB); otherwise
+  the CPU (`small` model).
 - The session file gives full access to that account: it lives in your home
-  directory (`~/.pytranscribe-bot/`), never in the repo.
+  directory (`~/.cache/pytranscribe/`), never in the repo. Losing it (a cache cleaner, say)
+  only means scanning the QR code again.
 
 ### Usage
 
@@ -151,6 +155,48 @@ only, with the transcript.
 |---|---|---|
 | `--allow` | required | a number allowed to use the bot (repeat for several) |
 | `-l`, `--lang` | detected for each message | force a language |
+
+## Cleanup
+
+The scripts install nothing outside caches, all rebuilt by the next `uv run`:
+
+| What | Size |
+|---|---|
+| Script environments (torch, CUDA…), in `uv cache dir` → `environments-v2/pytranscribe-*` | 3-7 GB each |
+| Whisper models (`medium` on GPU, `small` on CPU), see `hf cache ls` | 0.5-1.5 GB |
+| Diarization model (`pyannote/speaker-diarization-community-1`) | 30 MB |
+| Alignment models, in `~/.cache/torch` | 0.7 GB |
+| Bot session, in `~/.cache/pytranscribe` | small |
+
+Linux and macOS:
+
+```sh
+rm -rf "$(uv cache dir)"/environments-v2/pytranscribe-*
+uv cache prune        # wheels no script needs any more
+uvx --from huggingface_hub hf cache rm model/Systran/faster-whisper-medium model/pyannote/speaker-diarization-community-1
+rm -rf ~/.cache/torch ~/.cache/pytranscribe
+uvx --from huggingface_hub hf auth logout    # the Hugging Face token
+```
+
+Windows (PowerShell):
+
+```powershell
+Remove-Item -Recurse -Force "$(uv cache dir)\environments-v2\pytranscribe-*"
+uv cache prune
+uvx --from huggingface_hub hf cache rm model/Systran/faster-whisper-medium model/pyannote/speaker-diarization-community-1
+Remove-Item -Recurse -Force "$HOME\.cache\torch", "$HOME\.cache\pytranscribe"
+uvx --from huggingface_hub hf auth logout
+```
+
+`hf cache rm` finds the Hugging Face cache by itself (`HF_HOME` is honored);
+`hf cache ls` lists what is there, for the other Whisper sizes.
+
+uv ties an environment to the path of the script: every change to a script's
+dependencies, or a copy of the script elsewhere, builds a new environment and
+keeps the old one, so the first command is worth running from time to time.
+
+To retire the bot, also remove it on the phone: *Settings → Linked devices*.
+Deleting the session file does not unlink the device from the account.
 
 ## License
 
