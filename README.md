@@ -151,27 +151,42 @@ only, with the transcript.
 
 ## Cleanup
 
-The scripts install nothing outside caches, all rebuilt by the next `uv run`.
-Paths are those of Linux and macOS (`uv cache dir` prints uv's):
+The scripts install nothing outside caches, all rebuilt by the next `uv run`:
 
-| What | Where | Size |
-|---|---|---|
-| Script environments (torch, CUDA…) | `~/.cache/uv/environments-v2/pytranscribe-*` | 3-7 GB each |
-| Whisper model | `~/.cache/huggingface/hub/models--Systran--faster-whisper-*` | 0.1-3 GB |
-| Diarization model | `~/.cache/huggingface/hub/models--pyannote--*` | 30 MB |
-| Alignment models | `~/.cache/torch` | 0.7 GB |
-| Bot session | `~/.cache/pytranscribe/` | small |
+| What | Size |
+|---|---|
+| Script environments (torch, CUDA…), in `uv cache dir` → `environments-v2/pytranscribe-*` | 3-7 GB each |
+| Whisper models (`medium` on GPU, `small` on CPU), see `hf cache ls` | 0.5-1.5 GB |
+| Diarization model (`pyannote/speaker-diarization-community-1`) | 30 MB |
+| Alignment models, in `~/.cache/torch` | 0.7 GB |
+| Bot session, in `~/.cache/pytranscribe` | small |
+
+Linux and macOS:
 
 ```sh
-rm -rf ~/.cache/uv/environments-v2/pytranscribe-*
-rm -rf ~/.cache/huggingface/hub/models--Systran--faster-whisper-* ~/.cache/huggingface/hub/models--pyannote--*
-rm -rf ~/.cache/torch ~/.cache/pytranscribe
+rm -rf "$(uv cache dir)"/environments-v2/pytranscribe-*
 uv cache prune        # wheels no script needs any more
-hf auth logout        # the Hugging Face token
+uvx --from huggingface_hub hf cache rm model/Systran/faster-whisper-medium model/pyannote/speaker-diarization-community-1
+rm -rf ~/.cache/torch ~/.cache/pytranscribe
+uvx --from huggingface_hub hf auth logout    # the Hugging Face token
 ```
 
-Every change to a script's dependencies makes uv build a new environment and
-keep the old one, so the first command is worth running from time to time.
+Windows (PowerShell):
+
+```powershell
+Remove-Item -Recurse -Force "$(uv cache dir)\environments-v2\pytranscribe-*"
+uv cache prune
+uvx --from huggingface_hub hf cache rm model/Systran/faster-whisper-medium model/pyannote/speaker-diarization-community-1
+Remove-Item -Recurse -Force "$HOME\.cache\torch", "$HOME\.cache\pytranscribe"
+uvx --from huggingface_hub hf auth logout
+```
+
+`hf cache rm` finds the Hugging Face cache by itself (`HF_HOME` is honored);
+`hf cache ls` lists what is there, for the other Whisper sizes.
+
+uv ties an environment to the path of the script: every change to a script's
+dependencies, or a copy of the script elsewhere, builds a new environment and
+keeps the old one, so the first command is worth running from time to time.
 
 To retire the bot, also remove it on the phone: *Settings → Linked devices*.
 Deleting the session file does not unlink the device from the account.
