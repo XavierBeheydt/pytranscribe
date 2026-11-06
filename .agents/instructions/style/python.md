@@ -32,6 +32,9 @@ Applies to every Python script in the repo.
   no `if not items: return`.
 - Simple conditional assignment is a ternary, not an `if`/`else` block:
   `label = "items" if items else "none"`.
+- A comment says only what the code can't. Docstrings are added on need, not
+  by default: a substantial class or function whose use the name and the
+  signature don't tell, or code whose API docs are generated from them.
 - Ruff config lives in `ruff.toml`. The layout is the one `ruff format`
   produces, except a long list of plain values (e.g. language codes), which
   keeps several per line with a trailing `# fmt: skip`.
