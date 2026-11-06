@@ -152,7 +152,8 @@ devices*. The bot then replies to the voice messages of the allowed numbers
 only, with the transcript. The voice messages sent from the bot's account to
 itself are transcribed too; those sent to contacts only with `--others`, or
 after sending `/transcribe` to itself (send it again to stop), and the
-contact then sees the transcript.
+contact then sees the transcript. Send `/help` to itself for the list of the
+commands.
 
 | Option | Default | |
 |---|---|---|
