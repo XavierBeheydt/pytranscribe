@@ -26,6 +26,8 @@ SESSION = Path.home() / ".cache" / "pytranscribe" / "bot-session.db"
 class Args:
     allow: set[str]
     lang: str | None
+    others: bool
+    group: bool
 
     @classmethod
     def parse(cls) -> Self:
@@ -38,8 +40,14 @@ class Args:
             "-l", "--lang", metavar="CODE",
             help="language code, e.g. fr (default: detected for each message)",
         )
+        parser.add_argument(
+            "--others", action="store_true",
+            help="also transcribe your voice messages to contacts (toggle: /transcribe to self)",
+        )
+        parser.add_argument("--group", action="store_true", help="also transcribe in groups")
         ns = parser.parse_args()
-        return cls({re.sub(r"\D", "", number) for number in ns.allow}, ns.lang)
+        allow = {re.sub(r"\D", "", number) for number in ns.allow}
+        return cls(allow, ns.lang, ns.others, ns.group)
 
 
 def preload_cuda() -> None:
@@ -74,10 +82,26 @@ class Transcriber:
             return " ".join(s.text.strip() for s in segments).strip()
 
 
-def reply(client, message, allow: set[str], transcriber: Transcriber) -> None:
+def reply(
+    client, message, allow: set[str], transcriber: Transcriber, others: threading.Event,
+    group: bool,
+) -> None:
     source = message.Info.MessageSource
-    if source.IsFromMe or source.IsGroup or not message.Message.HasField("audioMessage"): return
-    if not {source.Sender.User, source.SenderAlt.User} & allow: return
+    if source.IsGroup and not group: return
+    sender = {source.Sender.User, source.SenderAlt.User}
+    me = client.get_me()
+    to_self = source.IsFromMe and source.Chat.User in {me.JID.User, me.LID.User}
+    text = message.Message.conversation or message.Message.extendedTextMessage.text
+    if to_self and text.strip() == "/transcribe":
+        if others.is_set(): others.clear()
+        else: others.set()
+        state = "on" if others.is_set() else "off"
+        print(f"◂ /transcribe → {state}", flush=True)
+        client.reply_message(f"transcription to contacts: {state}", message)
+        return
+    if not message.Message.HasField("audioMessage"): return
+    if source.IsFromMe and not to_self and not others.is_set(): return
+    if not source.IsFromMe and not sender & allow: return
     print(f"◂ voice message ({message.Message.audioMessage.seconds} s)", flush=True)
     text = transcriber(client.download_any(message.Message))
     client.reply_message(text or "(no speech detected)", message)
@@ -90,6 +114,8 @@ def main() -> None:
 
     args = Args.parse()
     transcriber = Transcriber(args.lang)
+    others = threading.Event()
+    if args.others: others.set()
     SESSION.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     client = NewClient(str(SESSION))
 
@@ -99,7 +125,7 @@ def main() -> None:
 
     @client.event(MessageEv)
     def on_message(client: NewClient, message: MessageEv) -> None:
-        reply(client, message, args.allow, transcriber)
+        reply(client, message, args.allow, transcriber, others, args.group)
 
     client.connect()
 
