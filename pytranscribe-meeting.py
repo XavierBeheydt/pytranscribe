@@ -18,9 +18,47 @@ from typing import Self
 
 # Languages with an alignment model in whisperx 3.8.6 (whisperx/alignment.py).
 LANGUAGES = (
-    "ar", "ca", "cs", "da", "de", "el", "en", "es", "eu", "fa", "fi", "fr", "gl", "he",
-    "hi", "hr", "hu", "id", "it", "ja", "ka", "ko", "lv", "ml", "nl", "nn", "no", "pl",
-    "pt", "ro", "ru", "sk", "sl", "sv", "te", "tl", "tr", "uk", "ur", "vi", "zh",
+    "ar",
+    "ca",
+    "cs",
+    "da",
+    "de",
+    "el",
+    "en",
+    "es",
+    "eu",
+    "fa",
+    "fi",
+    "fr",
+    "gl",
+    "he",
+    "hi",
+    "hr",
+    "hu",
+    "id",
+    "it",
+    "ja",
+    "ka",
+    "ko",
+    "lv",
+    "ml",
+    "nl",
+    "nn",
+    "no",
+    "pl",
+    "pt",
+    "ro",
+    "ru",
+    "sk",
+    "sl",
+    "sv",
+    "te",
+    "tl",
+    "tr",
+    "uk",
+    "ur",
+    "vi",
+    "zh",
 )
 
 
@@ -49,17 +87,26 @@ class Args:
             "--format", default="md", choices=("md", "txt"), help="output format (default: md)"
         )
         parser.add_argument(
-            "--no-diarize", dest="diarize", action="store_false",
+            "--no-diarize",
+            dest="diarize",
+            action="store_false",
             help="skip speaker diarization (no Hugging Face token needed)",
         )
         parser.add_argument(
-            "--rename", nargs="+", default=[], metavar="OLD=NEW",
+            "--rename",
+            nargs="+",
+            default=[],
+            metavar="OLD=NEW",
             type=lambda pair: pair.split("=", 1),
             help="rename speakers in an existing transcript, without transcribing",
         )
         ns = parser.parse_args()
         return cls(
-            ns.file, ns.output_dir or ns.file.parent, ns.lang, ns.format, ns.diarize,
+            ns.file,
+            ns.output_dir or ns.file.parent,
+            ns.lang,
+            ns.format,
+            ns.diarize,
             dict(ns.rename),
         )
 
@@ -90,7 +137,11 @@ def transcribe(args: Args) -> list[dict]:
     if lang in LANGUAGES:
         align_model, meta = whisperx.load_align_model(language_code=lang, device=device)
         result = whisperx.align(
-            result["segments"], align_model, meta, audio, device,
+            result["segments"],
+            align_model,
+            meta,
+            audio,
+            device,
             progress_callback=progress("align"),
         )
     else:
@@ -104,17 +155,21 @@ def transcribe(args: Args) -> list[dict]:
 
 def render(segments: list[dict], fmt: str) -> str:
     line, sep = ("**{}**: {}", "\n\n") if fmt == "md" else ("[{}] {}", "\n")
-    return sep.join(
-        line.format(s["speaker"], s["text"].strip()) if "speaker" in s else s["text"].strip()
-        for s in segments
-    ) + "\n"
+    return (
+        sep.join(
+            line.format(s["speaker"], s["text"].strip()) if "speaker" in s else s["text"].strip()
+            for s in segments
+        )
+        + "\n"
+    )
 
 
 def report(segments: list[dict]) -> list[str]:
     time: dict[str, float] = {}
     quote: dict[str, str] = {}
     for s in segments:
-        if "speaker" not in s: continue
+        if "speaker" not in s:
+            continue
         time[s["speaker"]] = time.get(s["speaker"], 0) + s["end"] - s["start"]
         quote.setdefault(s["speaker"], s["text"].strip())
     speakers = sorted(time)
@@ -147,7 +202,8 @@ def main() -> None:
     segments = transcribe(args)
     output.write_text(render(segments, args.format))
     print(output)
-    if args.diarize: rename(output, ask_names(report(segments)))
+    if args.diarize:
+        rename(output, ask_names(report(segments)))
 
 
 if __name__ == "__main__":
