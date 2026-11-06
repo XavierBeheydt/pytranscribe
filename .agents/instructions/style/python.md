@@ -28,8 +28,8 @@ Applies to every Python script in the repo.
 - Four spaces for indentation, lines up to 100 characters.
 - `_name` is module-private. `__name` is for class internals ("protected",
   name-mangled).
-- One line when the statement and its action are short:
-  `if not items: return`, `for x in xs: seen.add(x)`.
+- The body of an `if`, `for` or `while` always goes on its own line (PEP 8):
+  no `if not items: return`.
 - Simple conditional assignment is a ternary, not an `if`/`else` block:
   `label = "items" if items else "none"`.
 - Ruff config lives in `ruff.toml`. Don't run `ruff format`: it expands
