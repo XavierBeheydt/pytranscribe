@@ -35,15 +35,21 @@ class Args:
     def parse(cls) -> Self:
         parser = argparse.ArgumentParser(description="Transcribe WhatsApp voice messages.")
         parser.add_argument(
-            "--allow", action="append", required=True, metavar="NUMBER",
+            "--allow",
+            action="append",
+            required=True,
+            metavar="NUMBER",
             help="number allowed to use the bot, e.g. +33612345678 (repeatable)",
         )
         parser.add_argument(
-            "-l", "--lang", metavar="CODE",
+            "-l",
+            "--lang",
+            metavar="CODE",
             help="language code, e.g. fr (default: detected for each message)",
         )
         parser.add_argument(
-            "--others", action="store_true",
+            "--others",
+            action="store_true",
             help="also transcribe your voice messages to contacts (toggle: /transcribe to self)",
         )
         parser.add_argument("--group", action="store_true", help="also transcribe in groups")
@@ -68,7 +74,8 @@ class Transcriber:
         import ctranslate2
         from faster_whisper import WhisperModel
 
-        if sys.platform == "linux": preload_cuda()
+        if sys.platform == "linux":
+            preload_cuda()
         gpu = ctranslate2.get_cuda_device_count() > 0
         self.model = WhisperModel(
             "medium" if gpu else "small",
@@ -85,7 +92,11 @@ class Transcriber:
 
 
 def reply(
-    client, message, allow: set[str], transcriber: Transcriber, others: threading.Event,
+    client,
+    message,
+    allow: set[str],
+    transcriber: Transcriber,
+    others: threading.Event,
     group: bool,
 ) -> None:
     source = message.Info.MessageSource
