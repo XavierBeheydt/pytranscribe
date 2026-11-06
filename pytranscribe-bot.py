@@ -20,26 +20,49 @@ from pathlib import Path
 from typing import Self
 
 SESSION = Path.home() / ".cache" / "pytranscribe" / "bot-session.db"
+HELP = """/help: this list
+/transcribe: toggle the transcription of your voice messages to contacts (now {})"""
+
+
+def number(value: str) -> str:
+    compact = re.sub(r"[\s.-]", "", value)
+    if not re.fullmatch(r"\+[1-9]\d{6,14}", compact):
+        raise argparse.ArgumentTypeError(f"{value}: use the international format, e.g. +336…")
+    return compact[1:]
 
 
 @dataclass
 class Args:
     allow: set[str]
     lang: str | None
+    others: bool
+    group: bool
 
     @classmethod
     def parse(cls) -> Self:
         parser = argparse.ArgumentParser(description="Transcribe WhatsApp voice messages.")
         parser.add_argument(
-            "--allow", action="append", required=True, metavar="NUMBER",
+            "--allow",
+            action="append",
+            required=True,
+            metavar="NUMBER",
+            type=number,
             help="number allowed to use the bot, e.g. +33612345678 (repeatable)",
         )
         parser.add_argument(
-            "-l", "--lang", metavar="CODE",
+            "-l",
+            "--lang",
+            metavar="CODE",
             help="language code, e.g. fr (default: detected for each message)",
         )
+        parser.add_argument(
+            "--others",
+            action="store_true",
+            help="also transcribe your voice messages to contacts (toggle: /transcribe to self)",
+        )
+        parser.add_argument("--group", action="store_true", help="also transcribe in groups")
         ns = parser.parse_args()
-        return cls({re.sub(r"\D", "", number) for number in ns.allow}, ns.lang)
+        return cls(set(ns.allow), ns.lang, ns.others, ns.group)
 
 
 def preload_cuda() -> None:
@@ -58,7 +81,8 @@ class Transcriber:
         import ctranslate2
         from faster_whisper import WhisperModel
 
-        if sys.platform == "linux": preload_cuda()
+        if sys.platform == "linux":
+            preload_cuda()
         gpu = ctranslate2.get_cuda_device_count() > 0
         self.model = WhisperModel(
             "medium" if gpu else "small",
@@ -74,10 +98,40 @@ class Transcriber:
             return " ".join(s.text.strip() for s in segments).strip()
 
 
-def reply(client, message, allow: set[str], transcriber: Transcriber) -> None:
+def reply(
+    client,
+    message,
+    allow: set[str],
+    transcriber: Transcriber,
+    others: threading.Event,
+    transcribe_groups: bool,
+) -> None:
     source = message.Info.MessageSource
-    if source.IsFromMe or source.IsGroup or not message.Message.HasField("audioMessage"): return
-    if not {source.Sender.User, source.SenderAlt.User} & allow: return
+    if source.IsGroup and not transcribe_groups:
+        return
+    sender = {source.Sender.User, source.SenderAlt.User}
+    me = client.get_me()
+    to_self = source.IsFromMe and source.Chat.User in {me.JID.User, me.LID.User}
+    text = message.Message.conversation or message.Message.extendedTextMessage.text
+    if to_self and text.strip() == "/transcribe":
+        if others.is_set():
+            others.clear()
+        else:
+            others.set()
+        state = "on" if others.is_set() else "off"
+        print(f"◂ /transcribe → {state}", flush=True)
+        client.reply_message(f"transcription to contacts: {state}", message)
+        return
+    if to_self and text.strip() == "/help":
+        print("◂ /help", flush=True)
+        client.reply_message(HELP.format("on" if others.is_set() else "off"), message)
+        return
+    if not message.Message.HasField("audioMessage"):
+        return
+    if source.IsFromMe and not to_self and not others.is_set():
+        return
+    if not source.IsFromMe and not sender & allow:
+        return
     print(f"◂ voice message ({message.Message.audioMessage.seconds} s)", flush=True)
     text = transcriber(client.download_any(message.Message))
     client.reply_message(text or "(no speech detected)", message)
@@ -90,6 +144,9 @@ def main() -> None:
 
     args = Args.parse()
     transcriber = Transcriber(args.lang)
+    others = threading.Event()
+    if args.others:
+        others.set()
     SESSION.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     client = NewClient(str(SESSION))
 
@@ -99,7 +156,7 @@ def main() -> None:
 
     @client.event(MessageEv)
     def on_message(client: NewClient, message: MessageEv) -> None:
-        reply(client, message, args.allow, transcriber)
+        reply(client, message, args.allow, transcriber, others, args.group)
 
     client.connect()
 

@@ -354,8 +354,12 @@
           <ul class="points">
             <li lang="fr"><b>Répond avec la transcription</b>, langue détectée automatiquement.</li>
             <li lang="en"><b>Replies with the transcript</b>, language detected automatically.</li>
-            <li lang="fr"><b>Expéditeurs autorisés</b> uniquement.</li>
-            <li lang="en"><b>Allowed senders</b> only.</li>
+            <li lang="fr"><b>Expéditeurs autorisés</b> uniquement, au format international (<code>--allow +33…</code>).</li>
+            <li lang="en"><b>Allowed senders</b> only, in international format (<code>--allow +33…</code>).</li>
+            <li lang="fr"><b>Vos propres vocaux</b> aussi&nbsp;: envoyés à vous-même, à vos contacts, et dans les groupes avec <code>--group</code>.</li>
+            <li lang="en"><b>Your own voice messages</b> too: sent to yourself, to your contacts, and in groups with <code>--group</code>.</li>
+            <li lang="fr"><b>Des commandes</b> dans la conversation avec vous-même&nbsp;: <code>/transcribe</code> pour vos contacts, <code>/help</code>.</li>
+            <li lang="en"><b>Commands</b> in the chat with yourself: <code>/transcribe</code> for your contacts, <code>/help</code>.</li>
             <li lang="fr"><b>Tourne chez vous</b>&nbsp;: l'audio ne passe par aucun service de transcription.</li>
             <li lang="en"><b>Runs at home</b>: the audio goes through no transcription service.</li>
           </ul>
@@ -433,10 +437,11 @@
             { w: 900 }, { o: "^C", k: "m" }, { o: "live-20261105-101503.md" }
           ] },
           { path: "~/vocaux", ops: [
-            { c: "uv run pytranscribe-bot.py" },
+            { c: "uv run pytranscribe-bot.py --allow +33612345678" },
             { o: "✓ connected — waiting for voice messages", k: "m" }, { w: 1400 },
             { o: "◂ voice message (12 s)" }, { w: 1800 },
             { o: "▸ replied" }, { w: 1000 },
+            { o: "◂ /transcribe → on" }, { w: 1200 },
             { o: "◂ voice message (31 s)" }, { w: 2200 },
             { o: "▸ replied" }
           ] }
@@ -466,10 +471,11 @@
             { w: 900 }, { o: "^C", k: "m" }, { o: "live-20261105-101503.md" }
           ] },
           { path: "~/voice-notes", ops: [
-            { c: "uv run pytranscribe-bot.py" },
+            { c: "uv run pytranscribe-bot.py --allow +33612345678" },
             { o: "✓ connected — waiting for voice messages", k: "m" }, { w: 1400 },
             { o: "◂ voice message (12 s)" }, { w: 1800 },
             { o: "▸ replied" }, { w: 1000 },
+            { o: "◂ /transcribe → on" }, { w: 1200 },
             { o: "◂ voice message (31 s)" }, { w: 2200 },
             { o: "▸ replied" }
           ] }

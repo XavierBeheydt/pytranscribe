@@ -149,12 +149,18 @@ uv run pytranscribe-bot.py --allow +33612345678
 
 On the first run, a QR code is printed: scan it in WhatsApp → *Linked
 devices*. The bot then replies to the voice messages of the allowed numbers
-only, with the transcript.
+only, with the transcript. The voice messages sent from the bot's account to
+itself are transcribed too; those sent to contacts only with `--others`, or
+after sending `/transcribe` to itself (send it again to stop), and the
+contact then sees the transcript. Send `/help` to itself for the list of the
+commands.
 
 | Option | Default | |
 |---|---|---|
-| `--allow` | required | a number allowed to use the bot (repeat for several) |
+| `--allow` | required | a number allowed to use the bot, in international format (`+33…`; repeat for several) |
 | `-l`, `--lang` | detected for each message | force a language |
+| `--group` | off | also transcribe in groups (the whole group sees the transcript) |
+| `--others` | off | also transcribe your voice messages to contacts (toggle with `/transcribe` while running) |
 
 ## Cleanup
 
