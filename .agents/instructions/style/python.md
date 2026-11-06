@@ -33,4 +33,5 @@ Applies to every Python script in the repo.
 - Simple conditional assignment is a ternary, not an `if`/`else` block:
   `label = "items" if items else "none"`.
 - Ruff config lives in `ruff.toml`. The layout is the one `ruff format`
-  produces.
+  produces, except a long list of plain values (e.g. language codes), which
+  keeps several per line with a trailing `# fmt: skip`.
