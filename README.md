@@ -156,7 +156,7 @@ contact then sees the transcript.
 
 | Option | Default | |
 |---|---|---|
-| `--allow` | required | a number allowed to use the bot (repeat for several) |
+| `--allow` | required | a number allowed to use the bot, in international format (`+33…`; repeat for several) |
 | `-l`, `--lang` | detected for each message | force a language |
 | `--group` | off | also transcribe in groups (the whole group sees the transcript) |
 | `--others` | off | also transcribe your voice messages to contacts (toggle with `/transcribe` while running) |
