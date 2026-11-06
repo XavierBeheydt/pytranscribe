@@ -24,6 +24,12 @@ HELP = """/help: this list
 /transcribe: toggle the transcription of your voice messages to contacts (now {})"""
 
 
+def number(value: str) -> str:
+    if not value.startswith("+"):
+        raise argparse.ArgumentTypeError(f"{value}: use the international format, e.g. +336…")
+    return re.sub(r"\D", "", value)
+
+
 @dataclass
 class Args:
     allow: set[str]
@@ -39,6 +45,7 @@ class Args:
             action="append",
             required=True,
             metavar="NUMBER",
+            type=number,
             help="number allowed to use the bot, e.g. +33612345678 (repeatable)",
         )
         parser.add_argument(
@@ -54,8 +61,7 @@ class Args:
         )
         parser.add_argument("--group", action="store_true", help="also transcribe in groups")
         ns = parser.parse_args()
-        allow = {re.sub(r"\D", "", number) for number in ns.allow}
-        return cls(allow, ns.lang, ns.others, ns.group)
+        return cls(set(ns.allow), ns.lang, ns.others, ns.group)
 
 
 def preload_cuda() -> None:
@@ -97,10 +103,10 @@ def reply(
     allow: set[str],
     transcriber: Transcriber,
     others: threading.Event,
-    group: bool,
+    transcribe_groups: bool,
 ) -> None:
     source = message.Info.MessageSource
-    if source.IsGroup and not group:
+    if source.IsGroup and not transcribe_groups:
         return
     sender = {source.Sender.User, source.SenderAlt.User}
     me = client.get_me()
