@@ -59,6 +59,10 @@ Releases are tagged by hand as semver `vX.Y.Z`, right after the `dev` →
 `main` PR (titled `chore(release): vX.Y.Z`) is merged. Tag the merge commit
 of `main`, never `dev`. Never tag unless the user asks.
 
+Before opening a major or minor release PR, check that the website (`docs/`)
+covers the new features; if not, update it first, in a `docs(website)` PR to
+`dev`.
+
 ## Tracking
 
 Work is tracked with the GitHub issues of the repo.
