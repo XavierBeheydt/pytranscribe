@@ -47,11 +47,16 @@ class Args:
             "source", nargs="?", help="stream URL or file read by ffmpeg (default: microphone)"
         )
         parser.add_argument(
-            "-l", "--lang", metavar="CODE",
+            "-l",
+            "--lang",
+            metavar="CODE",
             help="language code, e.g. fr (default: detected for each sentence)",
         )
         parser.add_argument(
-            "-o", "--output-dir", type=Path, default=Path(),
+            "-o",
+            "--output-dir",
+            type=Path,
+            default=Path(),
             help="output directory (default: the current one)",
         )
         parser.add_argument(
@@ -66,15 +71,32 @@ def microphone() -> Iterator[np.ndarray]:
 
     blocks: queue.Queue[np.ndarray] = queue.Queue()
     with sounddevice.InputStream(
-        samplerate=SAMPLE_RATE, channels=1, dtype="float32", blocksize=BLOCK,
+        samplerate=SAMPLE_RATE,
+        channels=1,
+        dtype="float32",
+        blocksize=BLOCK,
         callback=lambda data, *_: blocks.put(data[:, 0].copy()),
     ):
-        while True: yield blocks.get()
+        while True:
+            yield blocks.get()
 
 
 def stream(source: str) -> Iterator[np.ndarray]:
-    cmd = ["ffmpeg", "-nostdin", "-loglevel", "error", "-i", source,
-           "-f", "f32le", "-ac", "1", "-ar", str(SAMPLE_RATE), "-"]
+    cmd = [
+        "ffmpeg",
+        "-nostdin",
+        "-loglevel",
+        "error",
+        "-i",
+        source,
+        "-f",
+        "f32le",
+        "-ac",
+        "1",
+        "-ar",
+        str(SAMPLE_RATE),
+        "-",
+    ]
     with subprocess.Popen(cmd, stdout=subprocess.PIPE) as proc:
         try:
             while data := proc.stdout.read(BLOCK * 4):
@@ -87,7 +109,7 @@ def cut(
     buffer: np.ndarray, offset: int, spans: list[dict]
 ) -> Iterator[tuple[float, np.ndarray, bool]]:
     for span in spans:
-        yield (offset + span["start"]) / SAMPLE_RATE, buffer[span["start"]:span["end"]], True
+        yield (offset + span["start"]) / SAMPLE_RATE, buffer[span["start"] : span["end"]], True
 
 
 def sentences(blocks: Iterator[np.ndarray]) -> Iterator[tuple[float, np.ndarray, bool]]:
@@ -137,7 +159,8 @@ class Transcriber:
         import ctranslate2
         from faster_whisper import WhisperModel
 
-        if sys.platform == "linux": preload_cuda()
+        if sys.platform == "linux":
+            preload_cuda()
         gpu = ctranslate2.get_cuda_device_count() > 0
         self.model = WhisperModel(
             "medium" if gpu else "small",
@@ -174,7 +197,8 @@ def main() -> None:
     clear = "\r\x1b[K" if tty else ""
     try:
         for start, audio, final in sentences(blocks):
-            if not (final or tty): continue
+            if not (final or tty):
+                continue
             text = transcriber(audio, final)
             stamp = clock(start)
             if final:
@@ -185,8 +209,11 @@ def main() -> None:
             else:
                 width = shutil.get_terminal_size().columns - 1
                 shown = f"[{stamp}] {text}"
-                print(clear + (shown if len(shown) <= width else "…" + shown[-(width - 1):]),
-                      end="", flush=True)
+                print(
+                    clear + (shown if len(shown) <= width else "…" + shown[-(width - 1) :]),
+                    end="",
+                    flush=True,
+                )
     except KeyboardInterrupt:
         pass
     args.output_dir.mkdir(parents=True, exist_ok=True)
