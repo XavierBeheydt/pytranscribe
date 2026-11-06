@@ -25,9 +25,10 @@ HELP = """/help: this list
 
 
 def number(value: str) -> str:
-    if not value.startswith("+"):
+    compact = re.sub(r"[\s.-]", "", value)
+    if not re.fullmatch(r"\+[1-9]\d{6,14}", compact):
         raise argparse.ArgumentTypeError(f"{value}: use the international format, e.g. +336…")
-    return re.sub(r"\D", "", value)
+    return compact[1:]
 
 
 @dataclass
