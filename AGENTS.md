@@ -54,7 +54,7 @@ A task is done only when one pass goes through with everything green:
 
 1. Read the [style guide](.agents/instructions/style/python.md).
 2. Code the feature or the fix, following the guide.
-3. Format and lint with the [python-lint](.agents/skills/python-lint/SKILL.md) skill.
+3. Format and lint with the [python-style](.agents/skills/python-style/SKILL.md) skill.
 4. Run the script (`uv run <script>.py` with a sample input, or `--help`)
    and check its output.
 5. If any step fails, fix and restart from step 2.
@@ -81,6 +81,7 @@ instead of improvising the command:
 
 - [python-deps](.agents/skills/python-deps/SKILL.md): add, remove or update a
   script's dependencies (uv).
-- [python-lint](.agents/skills/python-lint/SKILL.md): format and lint with ruff.
+- [python-style](.agents/skills/python-style/SKILL.md): format and lint with
+  ruff.
 - [todo-ai](.agents/skills/todo-ai/SKILL.md): resolve the `TODO-AI` comments,
   grouped, one subagent per group.
