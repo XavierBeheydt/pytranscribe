@@ -20,6 +20,8 @@ from pathlib import Path
 from typing import Self
 
 SESSION = Path.home() / ".cache" / "pytranscribe" / "bot-session.db"
+HELP = """/help: this list
+/transcribe: toggle the transcription of your voice messages to contacts (now {})"""
 
 
 def number(value: str) -> str:
@@ -107,6 +109,10 @@ def reply(
         state = "on" if others.is_set() else "off"
         print(f"◂ /transcribe → {state}", flush=True)
         client.reply_message(f"transcription to contacts: {state}", message)
+        return
+    if to_self and text.strip() == "/help":
+        print("◂ /help", flush=True)
+        client.reply_message(HELP.format("on" if others.is_set() else "off"), message)
         return
     if not message.Message.HasField("audioMessage"):
         return
